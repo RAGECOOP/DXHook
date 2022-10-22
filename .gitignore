@@ -1,5 +1,5 @@
-*.suo
-*.user
-Capture/obj
-TestScreenshot/obj
-bin
+**/bin
+**/obj
+**/packages
+**/.vs
+**/.vscode
