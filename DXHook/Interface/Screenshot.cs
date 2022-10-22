@@ -8,7 +8,7 @@ using System.Runtime.Remoting;
 using System.Security.Permissions;
 using System.Runtime.InteropServices;
 
-namespace Capture.Interface
+namespace DXHook.Interface
 {
     public class Screenshot : MarshalByRefObject, IDisposable
     {

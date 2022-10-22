@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Threading;
-using Capture.Hook.Common;
+using DXHook.Hook.Common;
 
-namespace Capture.Interface
+namespace DXHook.Interface
 {
     [Serializable]
     public delegate void RecordingStartedEvent(CaptureConfig config);

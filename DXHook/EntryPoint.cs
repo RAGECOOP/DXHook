@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Capture.Hook;
-using Capture.Interface;
+using DXHook.Hook;
+using DXHook.Interface;
 using System.Threading.Tasks;
 using System.Runtime.Remoting.Channels.Ipc;
 
-namespace Capture
+namespace DXHook
 {
     public class EntryPoint : EasyHook.IEntryPoint
     {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using SharpDX.DXGI;
 
-namespace Capture.Hook
+namespace DXHook.Hook
 {
     internal static class DXGI
     {

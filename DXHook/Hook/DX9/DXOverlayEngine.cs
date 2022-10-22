@@ -1,4 +1,4 @@
-﻿using Capture.Hook.Common;
+﻿using DXHook.Hook.Common;
 using SharpDX;
 using SharpDX.Direct3D9;
 using System;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Capture.Hook.DX9
+namespace DXHook.Hook.DX9
 {
     internal class DXOverlayEngine : Component
     {
@@ -187,11 +187,11 @@ namespace Capture.Hook.DX9
                     _imageCache[element] = result;
                 }
             }
-            else if (!_imageCache.TryGetValue(element, out result) && element.Bitmap != null)
+            else if (!_imageCache.TryGetValue(element, out result) && element._initialBmp != null)
             {
                 using (var ms = new MemoryStream())
                 {
-                    element.Bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    element._initialBmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
                     ms.Seek(0, SeekOrigin.Begin);
                     result = ToDispose(Texture.FromStream(Device, ms));
                 }

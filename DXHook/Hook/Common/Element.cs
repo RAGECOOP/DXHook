@@ -5,7 +5,7 @@ using System.Runtime.Remoting;
 using System.Security.Permissions;
 using System.Text;
 
-namespace Capture.Hook.Common
+namespace DXHook.Hook.Common
 {
     [Serializable]
     public abstract class Element: IOverlayElement, IDisposable

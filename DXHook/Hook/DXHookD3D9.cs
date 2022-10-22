@@ -8,11 +8,11 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Threading;
 using System.Drawing;
-using Capture.Interface;
+using DXHook.Interface;
 using SharpDX.Direct3D9;
-using Capture.Hook.Common;
+using DXHook.Hook.Common;
 
-namespace Capture.Hook
+namespace DXHook.Hook
 {
     internal class DXHookD3D9: BaseDXHook
     {
@@ -257,7 +257,7 @@ namespace Capture.Hook
             return Direct3DDevice_EndSceneHook.Original(devicePtr);
         }
 
-        Capture.Hook.DX9.DXOverlayEngine _overlayEngine;
+        DXHook.Hook.DX9.DXOverlayEngine _overlayEngine;
 
         /// <summary>
         /// Implementation of capturing from the render target of the Direct3D9 Device (or DeviceEx)

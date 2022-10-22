@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Capture.Hook
+namespace DXHook.Hook
 {
     /// <summary>
     /// Provides a safe handle around a block of unmanaged memory.

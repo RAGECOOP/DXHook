@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace Capture.Hook
+namespace DXHook.Hook
 {
     /// <summary>
     /// The full list of IDirect3DDevice9 functions with the correct index

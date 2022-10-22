@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Capture.Hook.Common
+namespace DXHook.Hook.Common
 {
     [Serializable]
     public class FramesPerSecond: TextElement

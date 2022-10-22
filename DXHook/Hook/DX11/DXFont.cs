@@ -8,7 +8,7 @@ using SharpDX.Direct3D11;
 using SharpDX;
 using System.Diagnostics;
 
-namespace Capture.Hook.DX11
+namespace DXHook.Hook.DX11
 {
     public class DXFont : IDisposable
     {

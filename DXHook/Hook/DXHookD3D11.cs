@@ -9,11 +9,11 @@ using System.Runtime.InteropServices;
 using EasyHook;
 using System.Threading;
 using System.IO;
-using Capture.Interface;
+using DXHook.Interface;
 using SharpDX.Direct3D;
-using Capture.Hook.Common;
+using DXHook.Hook.Common;
 
-namespace Capture.Hook
+namespace DXHook.Hook
 {
     enum D3D11DeviceVTbl : short
     {
@@ -68,7 +68,7 @@ namespace Capture.Hook
     /// <summary>
     /// Direct3D 11 Hook - this hooks the SwapChain.Present to take screenshots
     /// </summary>
-    internal class DXHookD3D11: BaseDXHook
+    public class DXHookD3D11: BaseDXHook
     {
         const int D3D11_DEVICE_METHOD_COUNT = 43;
 
@@ -92,7 +92,7 @@ namespace Capture.Hook
         Texture2D _resolvedRTShared;
         SharpDX.DXGI.KeyedMutex _resolvedRTSharedKeyedMutex;
         ShaderResourceView _resolvedSRV;
-        Capture.Hook.DX11.ScreenAlignedQuadRenderer _saQuad;
+        DXHook.Hook.DX11.ScreenAlignedQuadRenderer _saQuad;
         Texture2D _finalRT;
         Texture2D _resizedRT;
         RenderTargetView _resizedRTV;
@@ -584,7 +584,7 @@ namespace Capture.Hook
             return DXGISwapChain_PresentHook.Original(swapChainPtr, syncInterval, flags);
         }
 
-        Capture.Hook.DX11.DXOverlayEngine _overlayEngine;
+        DXHook.Hook.DX11.DXOverlayEngine _overlayEngine;
 
         IntPtr _swapChainPointer = IntPtr.Zero;
 

@@ -13,9 +13,10 @@ using System.Runtime.Remoting.Channels.Ipc;
 using System.Runtime.Remoting;
 using System.Runtime.InteropServices;
 using System.IO;
-using Capture.Interface;
-using Capture.Hook;
-using Capture;
+using DXHook.Interface;
+using DXHook.Hook;
+using DXHook;
+using DXHook.Hook.Common;
 
 namespace TestScreenshot
 {
@@ -259,21 +260,35 @@ namespace TestScreenshot
             }
         }
 
+        static Bitmap blah = Image.FromFile(@"M:\SandBox-Shared\Pictures\ragecoop-bg.png") as Bitmap;
+        static Bitmap bra = Image.FromFile(@"M:\SandBox-Shared\Pictures\braw.png") as Bitmap;
+        bool second = false;
+        ImageElement _image = new ImageElement(blah)
+        {
+            Scale = 0.3f,
+            Hidden = false,
+        };
         private void btnDisplayOverlay_Click(object sender, EventArgs e)
         {
-            _captureProcess.CaptureInterface.DrawOverlayInGame(new Capture.Hook.Common.Overlay
+            _captureProcess.CaptureInterface.DrawOverlayInGame(new Overlay
             {
-                Elements = new List<Capture.Hook.Common.IOverlayElement>
+                Elements = new List<IOverlayElement>
                 {
-                    new Capture.Hook.Common.FramesPerSecond(new System.Drawing.Font("Arial", 16, FontStyle.Bold)) {
+                    new DXHook.Hook.Common.FramesPerSecond(new System.Drawing.Font("Arial", 16, FontStyle.Bold)) {
                             Location = new Point(25, 25),
                             Color = Color.Red,
                             AntiAliased = true,
                             Text = "{0:N0} fps"
-                        },
+                        },_image
                 },
                 Hidden = !cbDrawOverlay.Checked
             });
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            _image.SetBitmap(second ? blah : bra);
+            second = !second;
         }
     }
 }

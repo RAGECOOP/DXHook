@@ -5,7 +5,7 @@ using System.Text;
 using System.Reflection;
 using System.IO;
 
-namespace Capture.Interface
+namespace DXHook.Interface
 {
     [Serializable]
     public class CaptureConfig

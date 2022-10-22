@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Capture.Hook
+namespace DXHook.Hook
 {
     // Thanks to remcoros for the initial version of the following helper classes
 

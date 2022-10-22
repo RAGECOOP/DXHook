@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Capture.Interface
+namespace DXHook.Interface
 {
     [Serializable]
     public class DisplayTextEventArgs: MarshalByRefObject

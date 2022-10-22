@@ -6,17 +6,17 @@ using EasyHook;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.IO;
-using Capture.Interface;
+using DXHook.Interface;
 using System.Diagnostics;
 using System.Threading;
-using Capture.Hook;
+using DXHook.Hook;
 using System.Security.Principal;
 using System.Security.Cryptography;
 using System.Security.AccessControl;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Serialization.Formatters;
 
-namespace Capture
+namespace DXHook
 {
     public class CaptureProcess : IDisposable
     {

@@ -11,9 +11,9 @@ using SharpDX.Direct3D;
 using SharpDX;
 using System.IO;
 using System.Threading;
-using Capture.Interface;
+using DXHook.Interface;
 
-namespace Capture.Hook
+namespace DXHook.Hook
 {
     enum D3D10_1DeviceVTbl : short
     {

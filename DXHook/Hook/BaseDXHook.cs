@@ -9,12 +9,12 @@ using System.Runtime.Remoting;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Diagnostics;
-using Capture.Interface;
+using DXHook.Interface;
 using System.Threading;
 
-namespace Capture.Hook
+namespace DXHook.Hook
 {
-    internal abstract class BaseDXHook: SharpDX.Component, IDXHook
+    public abstract class BaseDXHook: SharpDX.Component, IDXHook
     {
         protected readonly ClientCaptureInterfaceEventProxy InterfaceEventProxy = new ClientCaptureInterfaceEventProxy();
 
@@ -210,7 +210,7 @@ namespace Capture.Hook
             // Prepare the response
             Screenshot response = null;
 
-            if (request.Format == Capture.Interface.ImageFormat.PixelData)
+            if (request.Format == DXHook.Interface.ImageFormat.PixelData)
             {
                 // Return the raw data
                 response = new Screenshot(request.RequestId, data)
@@ -230,10 +230,10 @@ namespace Capture.Hook
                     System.Drawing.Imaging.ImageFormat imgFormat = System.Drawing.Imaging.ImageFormat.Bmp;
                     switch (request.Format)
                     {
-                        case Capture.Interface.ImageFormat.Jpeg:
+                        case DXHook.Interface.ImageFormat.Jpeg:
                             imgFormat = System.Drawing.Imaging.ImageFormat.Jpeg;
                             break;
-                        case Capture.Interface.ImageFormat.Png:
+                        case DXHook.Interface.ImageFormat.Png:
                             imgFormat = System.Drawing.Imaging.ImageFormat.Png;
                             break;
                     }

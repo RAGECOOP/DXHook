@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Capture.Interface;
+using DXHook.Interface;
 
-namespace Capture.Hook
+namespace DXHook.Hook
 {
     internal interface IDXHook: IDisposable
     {

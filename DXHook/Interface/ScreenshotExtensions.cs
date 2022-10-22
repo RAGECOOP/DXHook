@@ -6,7 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Capture.Interface
+namespace DXHook.Interface
 {
     public static class ScreenshotExtensions
     {

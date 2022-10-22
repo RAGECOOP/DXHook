@@ -5,7 +5,7 @@ using System.Text;
 using System.Diagnostics;
 using EasyHook;
 
-namespace Capture.Hook
+namespace DXHook.Hook
 {
     public class HookManager
     {

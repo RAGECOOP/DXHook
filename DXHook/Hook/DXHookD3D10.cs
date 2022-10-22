@@ -11,13 +11,13 @@ using EasyHook;
 using System.IO;
 using System.Threading;
 //using Device = SlimDX.Direct3D10.Device;
-using Capture.Interface;
+using DXHook.Interface;
 using SharpDX.Direct3D10;
 using Device = SharpDX.Direct3D10.Device;
 using SharpDX.DXGI;
 using SharpDX;
 
-namespace Capture.Hook
+namespace DXHook.Hook
 {
     enum D3D10DeviceVTbl : short
     {

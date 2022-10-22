@@ -1,5 +1,5 @@
 ﻿
-namespace Capture.Hook.DX11
+namespace DXHook.Hook.DX11
 {
     // Copyright (c) 2013 Justin Stenning
     // Adapted from original code by Alexandre Mutel

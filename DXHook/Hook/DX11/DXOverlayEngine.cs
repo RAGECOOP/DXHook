@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Capture.Hook.Common;
+using DXHook.Hook.Common;
 using SharpDX.Direct3D11;
 using SharpDX;
 using System.Diagnostics;
 
-namespace Capture.Hook.DX11
+namespace DXHook.Hook.DX11
 {
-    internal class DXOverlayEngine: Component
+    internal class DXOverlayEngine : Component
     {
         public List<IOverlay> Overlays { get; set; }
         public bool DeferredContext
@@ -29,7 +29,6 @@ namespace Capture.Hook.DX11
         RenderTargetView _renderTargetView;
         DXSprite _spriteEngine;
         Dictionary<string, DXFont> _fontCache = new Dictionary<string, DXFont>();
-        Dictionary<Element, DXImage> _imageCache = new Dictionary<Element, DXImage>();
 
         public DXOverlayEngine()
         {
@@ -53,7 +52,7 @@ namespace Capture.Hook.DX11
                 return false;
 
             _initialising = true;
-            
+
             try
             {
 
@@ -118,9 +117,9 @@ namespace Capture.Hook.DX11
         {
             //if (!DeferredContext)
             //{
-                SharpDX.Mathematics.Interop.RawViewportF[] viewportf = { new ViewportF(0, 0, _renderTarget.Description.Width, _renderTarget.Description.Height, 0, 1) };
-                _deviceContext.Rasterizer.SetViewports(viewportf);
-                _deviceContext.OutputMerger.SetTargets(_renderTargetView);
+            SharpDX.Mathematics.Interop.RawViewportF[] viewportf = { new ViewportF(0, 0, _renderTarget.Description.Width, _renderTarget.Description.Height, 0, 1) };
+            _deviceContext.Rasterizer.SetViewports(viewportf);
+            _deviceContext.OutputMerger.SetTargets(_renderTargetView);
             //}
         }
 
@@ -156,7 +155,12 @@ namespace Capture.Hook.DX11
                     {
                         DXImage image = GetImageForImageElement(imageElement);
                         if (image != null)
-                            _spriteEngine.DrawImage(imageElement.Location.X, imageElement.Location.Y, imageElement.Scale, imageElement.Angle, imageElement.Tint, image);
+                        {
+                            lock (image)
+                            {
+                                _spriteEngine.DrawImage(imageElement.Location.X, imageElement.Location.Y, imageElement.Scale, imageElement.Angle, imageElement.Tint, image);
+                            }
+                        }
                     }
                 }
             }
@@ -191,16 +195,14 @@ namespace Capture.Hook.DX11
 
         DXImage GetImageForImageElement(ImageElement element)
         {
-            DXImage result = null;
-
-            if (!_imageCache.TryGetValue(element, out result))
+            
+            if (element.Image == null && element._initialBmp != null)
             {
-                result = ToDispose(new DXImage(_device, _deviceContext));
-                result.Initialise(element.Bitmap);
-                _imageCache[element] = result;
+                element.Image = ToDispose(new DXImage(_device, _deviceContext));
+                element.Image.Initialise(element._initialBmp);
             }
 
-            return result;
+            return element.Image;
         }
 
         /// <summary>

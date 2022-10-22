@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Runtime.Remoting;
 using System.Security.Permissions;
 
-namespace Capture.Interface
+namespace DXHook.Interface
 {
     [Serializable]
     public class ScreenshotRequest: MarshalByRefObject, IDisposable

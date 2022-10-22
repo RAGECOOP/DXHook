@@ -1,11 +1,11 @@
-﻿using Capture.Hook.Common;
+﻿using DXHook.Hook.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Capture.Interface
+namespace DXHook.Interface
 {
     /// <summary>
     /// Note: Deliberately not using MarshalByRefObj

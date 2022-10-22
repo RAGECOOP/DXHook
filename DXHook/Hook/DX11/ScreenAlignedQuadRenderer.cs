@@ -1,4 +1,4 @@
-﻿namespace Capture.Hook.DX11
+﻿namespace DXHook.Hook.DX11
 {
     using System;
     using System.Collections.Generic;

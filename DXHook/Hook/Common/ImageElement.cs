@@ -1,46 +1,51 @@
-﻿using Capture.Interface;
+﻿using DXHook.Hook.DX11;
+using DXHook.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Drawing;
 
-namespace Capture.Hook.Common
+namespace DXHook.Hook.Common
 {
     [Serializable]
-    public class ImageElement: Element
+    public class ImageElement : Element
     {
+        internal DXImage Image;
+        internal Bitmap _initialBmp;
+
         /// <summary>
-        /// The image file bytes
+        /// Update current bitmap with supplied one
         /// </summary>
-        public virtual byte[] Image { get; set; }
-
-        System.Drawing.Bitmap _bitmap = null;
-        internal virtual System.Drawing.Bitmap Bitmap {
-            get
+        /// <param name="bmp"></param>
+        /// <param name="dispose">Whether to dispose given bitmap after use</param>
+        public void SetBitmap(Bitmap bmp,bool dispose=false)
+        {
+            lock (this)
             {
-                if (_bitmap == null && Image != null)
+                if(_initialBmp == null || Image == null)
                 {
-                    _bitmap = Image.ToBitmap();
-                    _ownsBitmap = true;
+                    _initialBmp = bmp;
                 }
-
-                return _bitmap;
+                else
+                {
+                    Image.Update(bmp);
+                }
+                if (dispose) { bmp?.Dispose(); }
             }
-            set { _bitmap = value; }
         }
-
         /// <summary>
         /// This value is multiplied with the source color (e.g. White will result in same color as source image)
         /// </summary>
         /// <remarks>
         /// Defaults to <see cref="System.Drawing.Color.White"/>.
         /// </remarks>
-        public virtual System.Drawing.Color Tint { get; set; } = System.Drawing.Color.White;
-        
+        public virtual Color Tint { get; set; } = System.Drawing.Color.White;
+
         /// <summary>
         /// The location of where to render this image element
         /// </summary>
-        public virtual System.Drawing.Point Location { get; set; }
+        public virtual Point Location { get; set; }
 
         public float Angle { get; set; }
 
@@ -52,7 +57,7 @@ namespace Capture.Hook.Common
 
         public ImageElement() { }
 
-        public ImageElement(string filename):
+        public ImageElement(string filename) :
             this(new System.Drawing.Bitmap(filename), true)
         {
             Filename = filename;
@@ -61,7 +66,7 @@ namespace Capture.Hook.Common
         public ImageElement(System.Drawing.Bitmap bitmap, bool ownsImage = false)
         {
             Tint = System.Drawing.Color.White;
-            this.Bitmap = bitmap;
+            SetBitmap(bitmap, ownsImage);
             _ownsBitmap = ownsImage;
             Scale = 1.0f;
         }
@@ -74,8 +79,7 @@ namespace Capture.Hook.Common
             {
                 if (_ownsBitmap)
                 {
-                    SafeDispose(this.Bitmap);
-                    this.Bitmap = null;
+                    _initialBmp?.Dispose();
                 }
             }
         }
