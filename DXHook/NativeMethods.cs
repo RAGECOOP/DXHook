@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace DXHook
 {
-    [System.Security.SuppressUnmanagedCodeSecurity()]
+    [System.Security.SuppressUnmanagedCodeSecurity]
     internal sealed class NativeMethods
     {
         private NativeMethods() { }

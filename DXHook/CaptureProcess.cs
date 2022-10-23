@@ -23,9 +23,8 @@ namespace DXHook
         /// <summary>
         /// Must be null to allow a random channel name to be generated
         /// </summary>
-        string _channelName = null;
+        readonly string _channelName;
         private IpcServerChannel _screenshotServer;
-        private CaptureInterface _serverInterface;
         public Process Process { get; set; }
 
         /// <summary>
@@ -51,14 +50,14 @@ namespace DXHook
             }
 
             captureInterface.ProcessId = process.Id;
-            _serverInterface = captureInterface;
+            CaptureInterface = captureInterface;
             //_serverInterface = new CaptureInterface() { ProcessId = process.Id };
 
             // Initialise the IPC server (with our instance of _serverInterface)
             _screenshotServer = RemoteHooking.IpcCreateServer<CaptureInterface>(
                 ref _channelName,
                 WellKnownObjectMode.Singleton,
-                _serverInterface);
+                CaptureInterface);
 
             try
             {
@@ -92,10 +91,7 @@ namespace DXHook
             BringProcessWindowToFront();
         }
 
-        public CaptureInterface CaptureInterface
-        {
-            get { return _serverInterface; }
-        }
+        public CaptureInterface CaptureInterface { get; }
 
         ~CaptureProcess()
         {
@@ -111,9 +107,9 @@ namespace DXHook
         /// <remarks>If the window does not come to the front within approx. 30 seconds an exception is raised</remarks>
         public void BringProcessWindowToFront()
         {
-            if (this.Process == null)
+            if (Process == null)
                 return;
-            IntPtr handle = this.Process.MainWindowHandle;
+            IntPtr handle = Process.MainWindowHandle;
             int i = 0;
 
             while (!NativeMethods.IsWindowInForeground(handle))
@@ -157,7 +153,7 @@ namespace DXHook
 
         #region IDispose
 
-        private bool _disposed = false;
+        private bool _disposed;
         public void Dispose()
         {
             Dispose(true);
@@ -171,7 +167,7 @@ namespace DXHook
                 if (disposing)
                 {
                     // Disconnect the IPC (which causes the remote entry point to exit)
-                    _serverInterface.Disconnect();
+                    CaptureInterface.Disconnect();
                 }
 
                 _disposed = true;

@@ -40,7 +40,7 @@ namespace DXHook.Hook.Common
         /// <remarks>
         /// Defaults to <see cref="System.Drawing.Color.White"/>.
         /// </remarks>
-        public virtual Color Tint { get; set; } = System.Drawing.Color.White;
+        public virtual Color Tint { get; set; } = Color.White;
 
         /// <summary>
         /// The location of where to render this image element
@@ -53,19 +53,19 @@ namespace DXHook.Hook.Common
 
         public string Filename { get; set; }
 
-        bool _ownsBitmap = false;
+        bool _ownsBitmap;
 
         public ImageElement() { }
 
         public ImageElement(string filename) :
-            this(new System.Drawing.Bitmap(filename), true)
+            this(new Bitmap(filename), true)
         {
             Filename = filename;
         }
 
-        public ImageElement(System.Drawing.Bitmap bitmap, bool ownsImage = false)
+        public ImageElement(Bitmap bitmap, bool ownsImage = false)
         {
-            Tint = System.Drawing.Color.White;
+            Tint = Color.White;
             SetBitmap(bitmap, ownsImage);
             _ownsBitmap = ownsImage;
             Scale = 1.0f;

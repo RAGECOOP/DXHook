@@ -44,7 +44,7 @@ namespace SharpDX
             if (name != null)
             {
                 this.name = name;
-                this.isNameImmutable = true;
+                isNameImmutable = true;
             }
         }
 

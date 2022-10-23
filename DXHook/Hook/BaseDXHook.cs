@@ -20,16 +20,16 @@ namespace DXHook.Hook
 
         public BaseDXHook(CaptureInterface ssInterface)
         {
-            this.Interface = ssInterface;
-            this.Timer = new Stopwatch();
-            this.Timer.Start();
-            this.FPS = new FramesPerSecond();
+            Interface = ssInterface;
+            Timer = new Stopwatch();
+            Timer.Start();
+            FPS = new FramesPerSecond();
 
             Interface.ScreenshotRequested += InterfaceEventProxy.ScreenshotRequestedProxyHandler;
             Interface.DisplayText += InterfaceEventProxy.DisplayTextProxyHandler;
             Interface.DrawOverlay += InterfaceEventProxy.DrawOverlayProxyHandler;
-            InterfaceEventProxy.ScreenshotRequested += new ScreenshotRequestedEvent(InterfaceEventProxy_ScreenshotRequested);
-            InterfaceEventProxy.DisplayText += new DisplayTextEvent(InterfaceEventProxy_DisplayText);
+            InterfaceEventProxy.ScreenshotRequested += InterfaceEventProxy_ScreenshotRequested;
+            InterfaceEventProxy.DisplayText += InterfaceEventProxy_DisplayText;
             InterfaceEventProxy.DrawOverlay += InterfaceEventProxy_DrawOverlay;
         }
 
@@ -40,7 +40,7 @@ namespace DXHook.Hook
 
         void InterfaceEventProxy_DisplayText(DisplayTextEventArgs args)
         {
-            TextDisplay = new TextDisplay()
+            TextDisplay = new TextDisplay
             {
                 Text = args.Text,
                 Duration = args.Duration
@@ -50,7 +50,7 @@ namespace DXHook.Hook
         protected virtual void InterfaceEventProxy_ScreenshotRequested(ScreenshotRequest request)
         {
             
-            this.Request = request;
+            Request = request;
         }
 
         private void InterfaceEventProxy_DrawOverlay(DrawOverlayEventArgs args)
@@ -74,7 +74,7 @@ namespace DXHook.Hook
  
         protected bool IsOverlayUpdatePending { get; set; }
 
-        int _processId = 0;
+        int _processId;
         protected int ProcessId
         {
             get
@@ -163,20 +163,18 @@ namespace DXHook.Hook
             {
                 return ((MemoryStream)stream).ToArray();
             }
-            else
+
+            byte[] buffer = new byte[32768];
+            using (MemoryStream ms = new MemoryStream())
             {
-                byte[] buffer = new byte[32768];
-                using (MemoryStream ms = new MemoryStream())
+                while (true)
                 {
-                    while (true)
+                    int read = stream.Read(buffer, 0, buffer.Length);
+                    if (read > 0)
+                        ms.Write(buffer, 0, read);
+                    if (read < buffer.Length)
                     {
-                        int read = stream.Read(buffer, 0, buffer.Length);
-                        if (read > 0)
-                            ms.Write(buffer, 0, read);
-                        if (read < buffer.Length)
-                        {
-                            return ms.ToArray();
-                        }
+                        return ms.ToArray();
                     }
                 }
             }
@@ -354,7 +352,7 @@ namespace DXHook.Hook
             set
             {
                 _config = value;
-                CaptureDelay = new TimeSpan(0, 0, 0, 0, (int)((1.0 / (double)_config.TargetFramesPerSecond) * 1000.0));
+                CaptureDelay = new TimeSpan(0, 0, 0, 0, (int)((1.0 / _config.TargetFramesPerSecond) * 1000.0));
             }
         }
 
@@ -397,7 +395,7 @@ namespace DXHook.Hook
                             hook.Deactivate();
                         }
 
-                        System.Threading.Thread.Sleep(100);
+                        Thread.Sleep(100);
 
                         // Now we can dispose of the hooks (which triggers the removal of the hook)
                         foreach (var hook in Hooks)

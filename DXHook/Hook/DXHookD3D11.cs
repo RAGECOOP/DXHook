@@ -77,13 +77,13 @@ namespace DXHook.Hook
         {
         }
 
-        List<IntPtr> _d3d11VTblAddresses = null;
-        List<IntPtr> _dxgiSwapChainVTblAddresses = null;
+        List<IntPtr> _d3d11VTblAddresses;
+        List<IntPtr> _dxgiSwapChainVTblAddresses;
 
-        Hook<DXGISwapChain_PresentDelegate> DXGISwapChain_PresentHook = null;
-        Hook<DXGISwapChain_ResizeTargetDelegate> DXGISwapChain_ResizeTargetHook = null;
+        Hook<DXGISwapChain_PresentDelegate> DXGISwapChain_PresentHook;
+        Hook<DXGISwapChain_ResizeTargetDelegate> DXGISwapChain_ResizeTargetHook;
 
-        object _lock = new object();
+        readonly object _lock = new object();
 
         #region Internal device resources
         SharpDX.Direct3D11.Device _device;
@@ -92,7 +92,7 @@ namespace DXHook.Hook
         Texture2D _resolvedRTShared;
         SharpDX.DXGI.KeyedMutex _resolvedRTSharedKeyedMutex;
         ShaderResourceView _resolvedSRV;
-        DXHook.Hook.DX11.ScreenAlignedQuadRenderer _saQuad;
+        DX11.ScreenAlignedQuadRenderer _saQuad;
         Texture2D _finalRT;
         Texture2D _resizedRT;
         RenderTargetView _resizedRTV;
@@ -119,7 +119,7 @@ namespace DXHook.Hook
 
         public override void Hook()
         {
-            this.DebugMessage("Hook: Begin");
+            DebugMessage("Hook: Begin");
             if (_d3d11VTblAddresses == null)
             {
                 _d3d11VTblAddresses = new List<IntPtr>();
@@ -128,7 +128,7 @@ namespace DXHook.Hook
                 #region Get Device and SwapChain method addresses
                 // Create temporary device + swapchain and determine method addresses
                 _renderForm = ToDispose(new SharpDX.Windows.RenderForm());
-                this.DebugMessage("Hook: Before device creation");
+                DebugMessage("Hook: Before device creation");
                 SharpDX.Direct3D11.Device.CreateWithSwapChain(
                     DriverType.Hardware,
                     DeviceCreationFlags.BgraSupport,
@@ -141,13 +141,13 @@ namespace DXHook.Hook
 
                 if (_device != null && _swapChain != null)
                 {
-                    this.DebugMessage("Hook: Device created");
+                    DebugMessage("Hook: Device created");
                     _d3d11VTblAddresses.AddRange(GetVTblAddresses(_device.NativePointer, D3D11_DEVICE_METHOD_COUNT));
                     _dxgiSwapChainVTblAddresses.AddRange(GetVTblAddresses(_swapChain.NativePointer, DXGI.DXGI_SWAPCHAIN_METHOD_COUNT));
                 }
                 else
                 {
-                    this.DebugMessage("Hook: Device creation failed");
+                    DebugMessage("Hook: Device creation failed");
                 }
                 #endregion
             }
@@ -250,7 +250,7 @@ namespace DXHook.Hook
                 RemoveAndDispose(ref _resolvedRTKeyedMutex);
                 RemoveAndDispose(ref _resolvedRTKeyedMutex_Dev2);
 
-                _query = new Query(resizeDevice, new QueryDescription()
+                _query = new Query(resizeDevice, new QueryDescription
                 {
                     Flags = QueryFlags.None,
                     Type = QueryType.Event
@@ -264,7 +264,7 @@ namespace DXHook.Hook
                     if (device != resizeDevice)
                         resolvedRTOptionFlags |= ResourceOptionFlags.SharedKeyedmutex;
 
-                    _resolvedRT = ToDispose(new Texture2D(device, new Texture2DDescription()
+                    _resolvedRT = ToDispose(new Texture2D(device, new Texture2DDescription
                     {
                         CpuAccessFlags = CpuAccessFlags.None,
                         Format = description.Format, // for multisampled backbuffer, this must be same format
@@ -304,7 +304,7 @@ namespace DXHook.Hook
                     _resolvedSRV = ToDispose(new ShaderResourceView(resizeDevice, _resolvedRT));
                 }
 
-                _finalRT = ToDispose(new Texture2D(resizeDevice, new Texture2DDescription()
+                _finalRT = ToDispose(new Texture2D(resizeDevice, new Texture2DDescription
                 {
                     CpuAccessFlags = CpuAccessFlags.Read,
                     Format = description.Format,
@@ -330,7 +330,7 @@ namespace DXHook.Hook
                 RemoveAndDispose(ref _resizedRTV);
                 RemoveAndDispose(ref _saQuad);
 
-                _resizedRT = ToDispose(new Texture2D(resizeDevice, new Texture2DDescription()
+                _resizedRT = ToDispose(new Texture2D(resizeDevice, new Texture2DDescription
                 {
                     Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm, // Supports BMP/PNG/etc
                     Height = request.Resize.Value.Height,
@@ -359,27 +359,27 @@ namespace DXHook.Hook
         /// <returns>The HRESULT of the original method</returns>
         int PresentHook(IntPtr swapChainPtr, int syncInterval, SharpDX.DXGI.PresentFlags flags)
         {
-            this.Frame();
+            Frame();
             SwapChain swapChain = (SharpDX.DXGI.SwapChain)swapChainPtr;
             try
             {
                 #region Screenshot Request
-                if (this.Request != null)
+                if (Request != null)
                 {
-                    this.DebugMessage("PresentHook: Request Start");
+                    DebugMessage("PresentHook: Request Start");
                     DateTime startTime = DateTime.Now;
                     using (Texture2D currentRT = Texture2D.FromSwapChain<Texture2D>(swapChain, 0))
                     {
                         #region Determine region to capture
                         Rectangle captureRegion = new Rectangle(0, 0, currentRT.Description.Width, currentRT.Description.Height);
 
-                        if (this.Request.RegionToCapture.Width > 0)
+                        if (Request.RegionToCapture.Width > 0)
                         {
-                            captureRegion = new Rectangle(this.Request.RegionToCapture.Left, this.Request.RegionToCapture.Top, this.Request.RegionToCapture.Right, this.Request.RegionToCapture.Bottom);
+                            captureRegion = new Rectangle(Request.RegionToCapture.Left, Request.RegionToCapture.Top, Request.RegionToCapture.Right, Request.RegionToCapture.Bottom);
                         }
-                        else if (this.Request.Resize.HasValue)
+                        else if (Request.Resize.HasValue)
                         {
-                            captureRegion = new Rectangle(0, 0, this.Request.Resize.Value.Width, this.Request.Resize.Value.Height);
+                            captureRegion = new Rectangle(0, 0, Request.Resize.Value.Width, Request.Resize.Value.Height);
                         }
                         #endregion
 
@@ -392,9 +392,9 @@ namespace DXHook.Hook
                         if (currentRT.Description.SampleDescription.Count > 1 || Request.Resize.HasValue)
                         {
                             if (Request.Resize.HasValue)
-                                this.DebugMessage("PresentHook: resizing texture");
+                                DebugMessage("PresentHook: resizing texture");
                             else
-                                this.DebugMessage("PresentHook: resolving multi-sampled texture");
+                                DebugMessage("PresentHook: resolving multi-sampled texture");
 
                             // Resolve into _resolvedRT
                             if (_resolvedRTKeyedMutex != null)
@@ -443,15 +443,15 @@ namespace DXHook.Hook
                         }
 
                         // Copy to memory and send back to host process on a background thread so that we do not cause any delay in the rendering pipeline
-                        _requestCopy = this.Request.Clone(); // this.Request gets set to null, so copy the Request for use in the thread
+                        _requestCopy = Request.Clone(); // this.Request gets set to null, so copy the Request for use in the thread
 
                         // Prevent the request from being processed a second time
-                        this.Request = null;
+                        Request = null;
 
                         bool acquireLock = sourceTexture == _resolvedRTShared;
 
 
-                        ThreadPool.QueueUserWorkItem(new WaitCallback((o) =>
+                        ThreadPool.QueueUserWorkItem(o =>
                         {
                             // Acquire lock on second device
                             if (acquireLock && _resolvedRTKeyedMutex_Dev2 != null)
@@ -460,7 +460,7 @@ namespace DXHook.Hook
                             lock (_lock)
                             {
                                 // Copy the subresource region, we are dealing with a flat 2D texture with no MipMapping, so 0 is the subresource index
-                                sourceTexture.Device.ImmediateContext.CopySubresourceRegion(sourceTexture, 0, new ResourceRegion()
+                                sourceTexture.Device.ImmediateContext.CopySubresourceRegion(sourceTexture, 0, new ResourceRegion
                                 {
                                     Top = captureRegion.Top,
                                     Bottom = captureRegion.Bottom,
@@ -516,7 +516,7 @@ namespace DXHook.Hook
                                     }
                                     finally
                                     {
-                                        this.DebugMessage("PresentHook: Copy to System Memory time: " + (DateTime.Now - startCopyToSystemMemory).ToString());
+                                        DebugMessage("PresentHook: Copy to System Memory time: " + (DateTime.Now - startCopyToSystemMemory));
                                         
                                         if (_finalRTMapped)
                                         {
@@ -533,19 +533,19 @@ namespace DXHook.Hook
                                     // Catch DXGI_ERROR_WAS_STILL_DRAWING and ignore - the data isn't available yet
                                 }
                             }
-                        }));
+                        });
                         
 
                         // Note: it would be possible to capture multiple frames and process them in a background thread
                     }
-                    this.DebugMessage("PresentHook: Copy BackBuffer time: " + (DateTime.Now - startTime).ToString());
-                    this.DebugMessage("PresentHook: Request End");
+                    DebugMessage("PresentHook: Copy BackBuffer time: " + (DateTime.Now - startTime));
+                    DebugMessage("PresentHook: Request End");
                 }
                 #endregion
 
                 #region Draw overlay (after screenshot so we don't capture overlay as well)
                 var displayOverlays = Overlays;
-                if (this.Config.ShowOverlay && displayOverlays != null)
+                if (Config.ShowOverlay && displayOverlays != null)
                 {
                     // Initialise Overlay Engine
                     if (_swapChainPointer != swapChain.NativePointer || _overlayEngine == null
@@ -555,7 +555,7 @@ namespace DXHook.Hook
                             _overlayEngine.Dispose();
 
                         _overlayEngine = new DX11.DXOverlayEngine();
-                        _overlayEngine.Overlays.AddRange((IEnumerable<IOverlay>)displayOverlays);
+                        _overlayEngine.Overlays.AddRange(displayOverlays);
                         _overlayEngine.Initialise(swapChain);
 
                         _swapChainPointer = swapChain.NativePointer;
@@ -575,7 +575,7 @@ namespace DXHook.Hook
             catch (Exception e)
             {
                 // If there is an error we do not want to crash the hooked application, so swallow the exception
-                this.DebugMessage("PresentHook: Exeception: " + e.GetType().FullName + ": " + e.ToString());
+                DebugMessage("PresentHook: Exeception: " + e.GetType().FullName + ": " + e);
                 //return unchecked((int)0x8000FFFF); //E_UNEXPECTED
             }
 
@@ -584,7 +584,7 @@ namespace DXHook.Hook
             return DXGISwapChain_PresentHook.Original(swapChainPtr, syncInterval, flags);
         }
 
-        DXHook.Hook.DX11.DXOverlayEngine _overlayEngine;
+        DX11.DXOverlayEngine _overlayEngine;
 
         IntPtr _swapChainPointer = IntPtr.Zero;
 
@@ -670,7 +670,7 @@ namespace DXHook.Hook
                                     }
                                     else
                                     {
-                                        this.DebugMessage(string.Format("Unable to convert Direct3D texture format {0} to a suitable WIC format", texture.Description.Format.ToString()));
+                                        DebugMessage(string.Format("Unable to convert Direct3D texture format {0} to a suitable WIC format", texture.Description.Format.ToString()));
                                         return;
                                     }
                                 }

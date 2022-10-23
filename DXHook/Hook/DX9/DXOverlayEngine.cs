@@ -15,15 +15,14 @@ namespace DXHook.Hook.DX9
     {
         public List<IOverlay> Overlays { get; set; }
 
-        bool _initialised = false;
-        bool _initialising = false;
+        bool _initialised;
+        bool _initialising;
 
-        Device _device;
         Sprite _sprite;
-        Dictionary<string, Font> _fontCache = new Dictionary<string, Font>();
-        Dictionary<Element, Texture> _imageCache = new Dictionary<Element, Texture>();
+        readonly Dictionary<string, Font> _fontCache = new Dictionary<string, Font>();
+        readonly Dictionary<Element, Texture> _imageCache = new Dictionary<Element, Texture>();
 
-        public Device Device { get { return _device; } }
+        public Device Device { get; private set; }
 
         public DXOverlayEngine()
         {
@@ -46,9 +45,9 @@ namespace DXHook.Hook.DX9
             try
             {
 
-                _device = device;
+                Device = device;
 
-                _sprite = ToDispose(new Sprite(_device));
+                _sprite = ToDispose(new Sprite(Device));
 
                 // Initialise any resources required for overlay elements
                 IntialiseElementResources();
@@ -162,7 +161,7 @@ namespace DXHook.Hook.DX9
 
             if (!_fontCache.TryGetValue(fontKey, out result))
             {
-                result = ToDispose(new Font(_device, new FontDescription { 
+                result = ToDispose(new Font(Device, new FontDescription { 
                     FaceName = element.Font.Name,
                     Italic = (element.Font.Style & System.Drawing.FontStyle.Italic) == System.Drawing.FontStyle.Italic,
                     Quality = (element.AntiAliased ? FontQuality.Antialiased : FontQuality.Default),
@@ -182,7 +181,7 @@ namespace DXHook.Hook.DX9
             {
                 if (!_imageCache.TryGetValue(element, out result))
                 {
-                    result = ToDispose(SharpDX.Direct3D9.Texture.FromFile(_device, element.Filename));
+                    result = ToDispose(SharpDX.Direct3D9.Texture.FromFile(Device, element.Filename));
 
                     _imageCache[element] = result;
                 }
@@ -209,7 +208,7 @@ namespace DXHook.Hook.DX9
         {
             if (true)
             {
-                _device = null;
+                Device = null;
             }
         }
 

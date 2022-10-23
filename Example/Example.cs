@@ -24,10 +24,10 @@ namespace Example
         DXHookD3D11 Hook;
 
 
-        static Bitmap blah = Image.FromFile(@"M:\SandBox-Shared\Pictures\ragecoop-bg.png") as Bitmap;
-        static Bitmap bra = Image.FromFile(@"M:\SandBox-Shared\Pictures\braw.png") as Bitmap;
+        static readonly Bitmap blah = Image.FromFile(@"M:\SandBox-Shared\Pictures\ragecoop-bg.png") as Bitmap;
+        static readonly Bitmap bra = Image.FromFile(@"M:\SandBox-Shared\Pictures\braw.png") as Bitmap;
         ImageElement _img;
-        bool second = false;
+        bool second;
         public Example()
         {
             var hwnd = Process.GetProcessesByName("explorer").Where(x => x.MainWindowHandle != IntPtr.Zero).First().MainWindowHandle;
@@ -65,14 +65,14 @@ namespace Example
                 else
                 {
                     Hook = new DXHookD3D11(Interface = new CaptureInterface());
-                    Hook.Config = new CaptureConfig()
+                    Hook.Config = new CaptureConfig
                     {
                         Direct3DVersion = Direct3DVersion.Direct3D11,
                         ShowOverlay = true
                     };
                     Hook.Hook();
                     _img = new ImageElement(blah) { Scale = 0.3f };
-                    Interface.DrawOverlayInGame(new Overlay()
+                    Interface.DrawOverlayInGame(new Overlay
                     {
                         Elements = new List<IOverlayElement> {
                         _img

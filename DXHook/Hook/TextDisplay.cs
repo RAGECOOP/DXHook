@@ -7,7 +7,7 @@ namespace DXHook.Hook
 {
     public class TextDisplay
     {
-        long _startTickCount = 0;
+        readonly long _startTickCount;
 
         public TextDisplay()
         {
@@ -35,12 +35,10 @@ namespace DXHook.Hook
             {
                 if (Display)
                 {
-                    return (float)Math.Abs(DateTime.Now.Ticks - _startTickCount) / (float)Duration.Ticks;
+                    return Math.Abs(DateTime.Now.Ticks - _startTickCount) / (float)Duration.Ticks;
                 }
-                else
-                {
-                    return 0;
-                }
+
+                return 0;
             }
         }
     }

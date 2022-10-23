@@ -11,12 +11,12 @@ namespace DXHook
 {
     public class EntryPoint : EasyHook.IEntryPoint
     {
-        List<IDXHook> _directXHooks = new List<IDXHook>();
-        IDXHook _directXHook = null;
-        private CaptureInterface _interface;
+        readonly List<IDXHook> _directXHooks = new List<IDXHook>();
+        IDXHook _directXHook;
+        private readonly CaptureInterface _interface;
         private System.Threading.ManualResetEvent _runWait;
-        ClientCaptureInterfaceEventProxy _clientEventProxy = new ClientCaptureInterfaceEventProxy();
-        IpcServerChannel _clientServerChannel = null;
+        readonly ClientCaptureInterfaceEventProxy _clientEventProxy = new ClientCaptureInterfaceEventProxy();
+        readonly IpcServerChannel _clientServerChannel = null;
 
         public EntryPoint(
             EasyHook.RemoteHooking.IContext context,
@@ -40,7 +40,7 @@ namespace DXHook
             System.Runtime.Remoting.Channels.BinaryServerFormatterSinkProvider binaryProv = new System.Runtime.Remoting.Channels.BinaryServerFormatterSinkProvider();
             binaryProv.TypeFilterLevel = System.Runtime.Serialization.Formatters.TypeFilterLevel.Full;
 
-            System.Runtime.Remoting.Channels.Ipc.IpcServerChannel _clientServerChannel = new System.Runtime.Remoting.Channels.Ipc.IpcServerChannel(properties, binaryProv);
+            IpcServerChannel _clientServerChannel = new IpcServerChannel(properties, binaryProv);
             System.Runtime.Remoting.Channels.ChannelServices.RegisterChannel(_clientServerChannel, false);
             
             #endregion
@@ -56,7 +56,7 @@ namespace DXHook
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyResolve += (sender, args) =>
             {
-                return this.GetType().Assembly.FullName == args.Name ? this.GetType().Assembly : null;
+                return GetType().Assembly.FullName == args.Name ? GetType().Assembly : null;
             };
 
             // NOTE: This is running in the target process
@@ -261,7 +261,7 @@ namespace DXHook
         #region Check Host Is Alive
 
         Task _checkAlive;
-        long _stopCheckAlive = 0;
+        long _stopCheckAlive;
         
         /// <summary>
         /// Begin a background thread to check periodically that the host process is still accessible on its IPC channel

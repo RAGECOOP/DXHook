@@ -21,9 +21,9 @@ namespace DXHook.Hook.Common
             }
         }
 
-        int _frames = 0;
-        int _lastTickCount = 0;
-        float _lastFrameRate = 0;
+        int _frames;
+        int _lastTickCount;
+        float _lastFrameRate;
 
         public FramesPerSecond(System.Drawing.Font font)
             : base(font)

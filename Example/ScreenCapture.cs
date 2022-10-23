@@ -59,7 +59,7 @@ namespace Example
 			public static extern IntPtr GetWindowDC(IntPtr hWnd);
 
 			[DllImport("user32.dll", CharSet = CharSet.None, ExactSpelling = false)]
-			public static extern IntPtr GetWindowRect(IntPtr hWnd, ref ScreenCapture.User32.RECT rect);
+			public static extern IntPtr GetWindowRect(IntPtr hWnd, ref RECT rect);
 
 			[DllImport("user32.dll", CharSet = CharSet.None, ExactSpelling = false)]
 			public static extern IntPtr ReleaseDC(IntPtr hWnd, IntPtr hDC);

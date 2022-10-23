@@ -19,7 +19,7 @@ namespace DXHook.Hook
         /// <summary>
         /// When called from within the <see cref="Hook.NewFunc"/> delegate this will call the original function at <see cref="Hook.FuncToHook"/>.
         /// </summary>
-        public T Original { get; private set; }
+        public T Original { get; }
 
         /// <summary>
         /// Creates a new hook at <paramref name="funcToHook"/> redirecting to <paramref name="newFunc"/>. The hook starts inactive so a call to <see cref="Activate"/> is required to enable the hook.
@@ -45,17 +45,17 @@ namespace DXHook.Hook
         /// <summary>
         /// The hooked function location
         /// </summary>
-        public IntPtr FuncToHook { get; private set; }
+        public IntPtr FuncToHook { get; }
         
         /// <summary>
         /// The replacement delegate
         /// </summary>
-        public Delegate NewFunc { get; private set; }
+        public Delegate NewFunc { get; }
         
         /// <summary>
         /// The callback object passed to LocalHook constructor
         /// </summary>
-        public object Owner { get; private set; }
+        public object Owner { get; }
         
         /// <summary>
         /// The <see cref="EasyHook.LocalHook"/> instance
@@ -75,9 +75,9 @@ namespace DXHook.Hook
         /// <param name="owner">The object to assign as the "callback" object within the <see cref="EasyHook.LocalHook"/> instance.</param>
         public Hook(IntPtr funcToHook, Delegate newFunc, object owner)
         {
-            this.FuncToHook = funcToHook;
-            this.NewFunc = newFunc;
-            this.Owner = owner;
+            FuncToHook = funcToHook;
+            NewFunc = newFunc;
+            Owner = owner;
             
             CreateHook();
         }
@@ -91,18 +91,18 @@ namespace DXHook.Hook
         {
             if (LocalHook != null) return;
 
-            this.LocalHook = LocalHook.Create(FuncToHook, NewFunc, Owner);
+            LocalHook = LocalHook.Create(FuncToHook, NewFunc, Owner);
         }
 
         protected void UnHook()
         {
-            if (this.IsActive)
+            if (IsActive)
                 Deactivate();
 
-            if (this.LocalHook != null)
+            if (LocalHook != null)
             {
-                this.LocalHook.Dispose();
-                this.LocalHook = null;
+                LocalHook.Dispose();
+                LocalHook = null;
             }
         }
 
@@ -111,13 +111,13 @@ namespace DXHook.Hook
         /// </summary>
         public void Activate()
         {
-            if (this.LocalHook == null)
+            if (LocalHook == null)
                 CreateHook();
 
-            if (this.IsActive) return;
+            if (IsActive) return;
             
-            this.IsActive = true;
-            this.LocalHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            IsActive = true;
+            LocalHook.ThreadACL.SetExclusiveACL(new[] { 0 });
         }
 
         /// <summary>
@@ -125,10 +125,10 @@ namespace DXHook.Hook
         /// </summary>
         public void Deactivate()
         {
-            if (!this.IsActive) return;
+            if (!IsActive) return;
 
-            this.IsActive = false;
-            this.LocalHook.ThreadACL.SetInclusiveACL(new Int32[] { 0 });
+            IsActive = false;
+            LocalHook.ThreadACL.SetInclusiveACL(new[] { 0 });
         }
 
 

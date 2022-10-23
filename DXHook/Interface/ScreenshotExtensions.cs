@@ -31,10 +31,8 @@ namespace DXHook.Interface
             {
                 return screenshot.Data.ToBitmap(screenshot.Width, screenshot.Height, screenshot.Stride, screenshot.PixelFormat);
             }
-            else
-            {
-                return screenshot.Data.ToBitmap();
-            }
+
+            return screenshot.Data.ToBitmap();
         }
 
         public static Bitmap ToBitmap(this byte[] imageBytes)

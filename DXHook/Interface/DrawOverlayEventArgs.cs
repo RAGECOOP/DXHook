@@ -16,9 +16,5 @@ namespace DXHook.Interface
         public IOverlay Overlay { get; set; }
 
         public bool IsUpdatePending { get; set; }
-
-        public DrawOverlayEventArgs()
-        {
-        }
     }
 }

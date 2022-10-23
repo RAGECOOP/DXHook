@@ -49,7 +49,7 @@ namespace DXHook.Hook.DX11
             STYLE_BOLD_ITALIC = 3,
             STYLE_UNDERLINE = 4,
             STYLE_STRIKEOUT = 8
-        };
+        }
 
         bool _initialized;
         const char StartChar = (char)33;
@@ -57,8 +57,9 @@ namespace DXHook.Hook.DX11
         const uint NumChars = EndChar - StartChar;
         ShaderResourceView _fontSheetSRV;
         Texture2D _fontSheetTex;
-        int _texWidth, _texHeight;
-        Rectangle[] _charRects = new Rectangle[NumChars];
+        readonly int _texWidth;
+        int _texHeight;
+        readonly Rectangle[] _charRects = new Rectangle[NumChars];
         int _spaceWidth, _charHeight;
 
         public bool Initialize(string FontName, float FontSize, System.Drawing.FontStyle FontStyle, bool AntiAliased)
@@ -186,7 +187,7 @@ namespace DXHook.Hook.DX11
                 if (fontSheetX + charWidth >= _texWidth)
                 {
                     fontSheetX = 0;
-                    fontSheetY += (int)(_charHeight) + 1;
+                    fontSheetY += _charHeight + 1;
                 }
 
                 _charRects[i] = new Rectangle(fontSheetX, fontSheetY, charWidth, _charHeight);

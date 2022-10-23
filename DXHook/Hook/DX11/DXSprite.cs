@@ -15,7 +15,7 @@ namespace DXHook.Hook.DX11
 
     public class DXSprite : Component
     {
-        Device _device;
+        readonly Device _device;
         DeviceContext _deviceContext;
 
         public DXSprite(Device device, DeviceContext deviceContext)
@@ -63,13 +63,13 @@ namespace DXHook.Hook.DX11
         SharpDX.Direct3D11.Buffer _IB;
         int _texWidth;
         int _texHeight;
-        List<Sprite> _spriteList = new List<Sprite>(128);
+        readonly List<Sprite> _spriteList = new List<Sprite>(128);
         float _screenWidth;
         float _screenHeight;
         CompilationResult _compiledFX;
         Effect _effect;
 
-        SafeHGlobal _indexBuffer = null;
+        SafeHGlobal _indexBuffer;
         public bool Initialize()
         {
             Debug.Assert(!_initialized);
@@ -175,7 +175,7 @@ technique11 SpriteTech {
 
                     _IB = ToDispose(new SharpDX.Direct3D11.Buffer(_device, _indexBuffer.DangerousGetHandle(), ibd));
 
-                    BlendStateDescription transparentDesc = new BlendStateDescription()
+                    BlendStateDescription transparentDesc = new BlendStateDescription
                     {
                         AlphaToCoverageEnable = false,
                         IndependentBlendEnable = false,
@@ -200,7 +200,7 @@ technique11 SpriteTech {
 
         internal static Color4 ToColor4(System.Drawing.Color color)
         {
-            Vector4 Vec = new Vector4(color.R > 0 ? (float)(color.R / 255.0f) : 0.0f, color.G > 0 ? (float)(color.G / 255.0f) : 0.0f, color.B > 0 ? (float)(color.B / 255.0f) : 0.0f, color.A > 0 ? (float)(color.A / 255.0f) : 0.0f);
+            Vector4 Vec = new Vector4(color.R > 0 ? color.R / 255.0f : 0.0f, color.G > 0 ? color.G / 255.0f : 0.0f, color.B > 0 ? color.B / 255.0f : 0.0f, color.A > 0 ? color.A / 255.0f : 0.0f);
             return new Color4(Vec);
         }
 
@@ -379,8 +379,8 @@ technique11 SpriteTech {
         {
             Vector3 p;
 
-            p.X = 2.0f * (float)x / _screenWidth - 1.0f;
-            p.Y = 1.0f - 2.0f * (float)y / _screenHeight;
+            p.X = 2.0f * x / _screenWidth - 1.0f;
+            p.Y = 1.0f - 2.0f * y / _screenHeight;
             p.Z = z;
 
             return p;

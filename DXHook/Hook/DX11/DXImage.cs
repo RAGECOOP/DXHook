@@ -8,42 +8,25 @@ namespace DXHook.Hook.DX11
 {
     public class DXImage : DisposeCollector
     {
-        Device _device;
         DeviceContext _deviceContext;
         Texture2D _tex;
         ShaderResourceView _texSRV;
-        int _texWidth, _texHeight;
-        bool _initialised = false;
+        bool _initialised;
 
-        public int Width
-        {
-            get
-            {
-                return _texWidth;
-            }
-        }
+        public int Width { get; private set; }
 
-        public int Height
-        {
-            get
-            {
-                return _texHeight;
-            }
-        }
+        public int Height { get; private set; }
 
-        public Device Device
-        {
-            get { return _device; }
-        }
+        public Device Device { get; }
 
         public DXImage(Device device, DeviceContext deviceContext)
         {
-            _device = device;
+            Device = device;
             _deviceContext = deviceContext;
             _tex = null;
             _texSRV = null;
-            _texWidth = 0;
-            _texHeight = 0;
+            Width = 0;
+            Height = 0;
 
 
             _srvDesc = new ShaderResourceViewDescription();
@@ -68,7 +51,7 @@ namespace DXHook.Hook.DX11
         private Texture2DDescription _textDesc;
         private ShaderResourceViewDescription _srvDesc;
 
-        private object _srvLock = new object();
+        private readonly object _srvLock = new object();
 
         public bool Initialise(Bitmap bitmap)
         {
@@ -85,10 +68,10 @@ namespace DXHook.Hook.DX11
                 //Debug.Assert(bitmap.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                 System.Drawing.Imaging.BitmapData bmData;
 
-                _textDesc.Width = _texWidth = bitmap.Width;
-                _textDesc.Height = _texHeight = bitmap.Height;
+                _textDesc.Width = Width = bitmap.Width;
+                _textDesc.Height = Height = bitmap.Height;
 
-                bmData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, _texWidth, _texHeight), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                bmData = bitmap.LockBits(new Rectangle(0, 0, Width, Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
                 try
                 {
 
@@ -97,11 +80,11 @@ namespace DXHook.Hook.DX11
                     data.RowPitch = bmData.Stride;// _texWidth * 4;
                     data.SlicePitch = 0;
 
-                    _tex = Collect(new Texture2D(_device, _textDesc, new[] { data }));
+                    _tex = Collect(new Texture2D(Device, _textDesc, new[] { data }));
                     if (_tex == null)
                         return false;
 
-                    _texSRV = Collect(new ShaderResourceView(_device, _tex, _srvDesc));
+                    _texSRV = Collect(new ShaderResourceView(Device, _tex, _srvDesc));
                     if (_texSRV == null)
                         return false;
                 }

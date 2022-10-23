@@ -56,8 +56,7 @@ float4 PSMain(PixelIn input) : SV_Target
 ";
 
 
-
-        string shaderCode = @"Texture2D<float4> Texture0 : register(t0);
+        readonly string shaderCode = @"Texture2D<float4> Texture0 : register(t0);
 SamplerState Sampler : register(s0);
 
 struct PixelIn
@@ -110,10 +109,6 @@ float4 PSMain(PixelIn input) : SV_Target
         public ShaderResourceView ShaderResource { get; set; }
         public RenderTargetView RenderTargetView { get; set; }
         public Texture2D RenderTarget { get; set; }
-
-        public ScreenAlignedQuadRenderer()
-        {
-        }
 
         /// <summary>
         /// Create any device dependent resources here.
@@ -202,7 +197,7 @@ float4 PSMain(PixelIn input) : SV_Target
                 MaximumLod = float.MaxValue
             }));
 
-            context.Rasterizer.State = ToDispose(new RasterizerState(device, new RasterizerStateDescription()
+            context.Rasterizer.State = ToDispose(new RasterizerState(device, new RasterizerStateDescription
             {
                 CullMode = CullMode.None,
                 FillMode = FillMode.Solid,                
@@ -240,7 +235,7 @@ float4 PSMain(PixelIn input) : SV_Target
 
         protected override void DoRender()
         {
-            var context = this.DeviceManager.Direct3DContext;
+            var context = DeviceManager.Direct3DContext;
 
             //context.InputAssembler.InputLayout = vertexLayout;
             //context.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleStrip;

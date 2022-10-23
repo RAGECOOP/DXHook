@@ -10,9 +10,9 @@ namespace DXHook.Hook
     /// </summary>
     public class FramesPerSecond
     {
-        int _frames = 0;
-        int _lastTickCount = 0;
-        float _lastFrameRate = 0;
+        int _frames;
+        int _lastTickCount;
+        float _lastFrameRate;
 
         /// <summary>
         /// Must be called each frame

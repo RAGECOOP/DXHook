@@ -71,7 +71,7 @@ namespace TestScreenshot
             }
         }
 
-        int processId = 0;
+        int processId;
         Process _process;
         CaptureProcess _captureProcess;
         private void AttachProcess()
@@ -118,7 +118,7 @@ namespace TestScreenshot
                     direct3DVersion = Direct3DVersion.AutoDetect;
                 }
 
-                CaptureConfig cc = new CaptureConfig()
+                CaptureConfig cc = new CaptureConfig
                 {
                     Direct3DVersion = direct3DVersion,
                     ShowOverlay = cbDrawOverlay.Checked
@@ -128,7 +128,7 @@ namespace TestScreenshot
                 _process = process;
 
                 var captureInterface = new CaptureInterface();
-                captureInterface.RemoteMessage += new MessageReceivedEvent(CaptureInterface_RemoteMessage);
+                captureInterface.RemoteMessage += CaptureInterface_RemoteMessage;
                 _captureProcess = new CaptureProcess(process, cc, captureInterface);
                 
                 break;
@@ -221,7 +221,7 @@ namespace TestScreenshot
                     else
                     {
                         end = DateTime.Now;
-                        txtDebugLog.Text = String.Format("Debug: {0}\r\n{1}", "Total Time: " + (end-start).ToString(), txtDebugLog.Text);
+                        txtDebugLog.Text = String.Format("Debug: {0}\r\n{1}", "Total Time: " + (end-start), txtDebugLog.Text);
                     }
                 })
             );
@@ -252,7 +252,7 @@ namespace TestScreenshot
                     );
                 }
 
-                Thread t = new Thread(new ThreadStart(DoRequest));
+                Thread t = new Thread(DoRequest);
                 t.Start();
             }
             catch
@@ -260,10 +260,11 @@ namespace TestScreenshot
             }
         }
 
-        static Bitmap blah = Image.FromFile(@"M:\SandBox-Shared\Pictures\ragecoop-bg.png") as Bitmap;
-        static Bitmap bra = Image.FromFile(@"M:\SandBox-Shared\Pictures\braw.png") as Bitmap;
-        bool second = false;
-        ImageElement _image = new ImageElement(blah)
+        static readonly Bitmap blah = Image.FromFile(@"M:\SandBox-Shared\Pictures\ragecoop-bg.png") as Bitmap;
+        static readonly Bitmap bra = Image.FromFile(@"M:\SandBox-Shared\Pictures\braw.png") as Bitmap;
+        bool second;
+
+        readonly ImageElement _image = new ImageElement(blah)
         {
             Scale = 0.3f,
             Hidden = false,

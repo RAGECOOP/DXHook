@@ -20,15 +20,15 @@ namespace DXHook.Hook.DX11
             }
         }
 
-        bool _initialised = false;
-        bool _initialising = false;
+        bool _initialised;
+        bool _initialising;
 
         Device _device;
         DeviceContext _deviceContext;
         Texture2D _renderTarget;
         RenderTargetView _renderTargetView;
         DXSprite _spriteEngine;
-        Dictionary<string, DXFont> _fontCache = new Dictionary<string, DXFont>();
+        readonly Dictionary<string, DXFont> _fontCache = new Dictionary<string, DXFont>();
 
         public DXOverlayEngine()
         {

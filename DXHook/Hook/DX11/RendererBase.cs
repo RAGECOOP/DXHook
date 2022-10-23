@@ -49,11 +49,11 @@ namespace DXHook.Hook.DX11
         /// <param name="deviceManager"></param>
         public virtual void Initialize(DeviceManager dm)
         {
-            this.DeviceManager = dm;
+            DeviceManager = dm;
 
             // The device is already initialized, create
             // any device resources immediately.
-            if (this.DeviceManager.Direct3DDevice != null)
+            if (DeviceManager.Direct3DDevice != null)
             {
                 CreateDeviceDependentResources();
             }

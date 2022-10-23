@@ -121,8 +121,8 @@ namespace DXHook.Interface
         #region Still image Capture
 
         object _lock = new object();
-        Guid? _requestId = null;
-        Action<Screenshot> _completeScreenshot = null;
+        Guid? _requestId;
+        Action<Screenshot> _completeScreenshot;
         ManualResetEvent _wait = new ManualResetEvent(false);
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace DXHook.Interface
                     Resize = resize,
                 });
 
-                _completeScreenshot = (sc) =>
+                _completeScreenshot = sc =>
                 {
                     try
                     {
@@ -185,8 +185,8 @@ namespace DXHook.Interface
             {
                 return getScreenshot.EndInvoke(result);
             }
-            else
-                return null;
+
+            return null;
         }
 
         public void SendScreenshotResponse(Screenshot screenshot)
@@ -255,7 +255,7 @@ namespace DXHook.Interface
         /// <param name="overlay"></param>
         public void DrawOverlayInGame(IOverlay overlay)
         {
-            SafeInvokeDrawOverlay(new DrawOverlayEventArgs()
+            SafeInvokeDrawOverlay(new DrawOverlayEventArgs
             {
                 Overlay = overlay
             });
