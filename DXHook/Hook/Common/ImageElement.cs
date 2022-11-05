@@ -31,7 +31,7 @@ namespace DXHook.Hook.Common
         internal DXImage Back;
         private bool _ownsBuffer;
         public int BufferSize { get; private set; }
-        internal BitmapInfo BitmapInfo = new BitmapInfo() { BytesPerPixel = 4 };
+        internal BitmapInfo BitmapInfo = new BitmapInfo { BytesPerPixel = 4 };
 
         /// <summary>
         /// Update current bitmap with supplied one

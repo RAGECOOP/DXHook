@@ -16,7 +16,7 @@ namespace DXHook.Hook.DX11
     public class DXSprite : Component
     {
         readonly Device _device;
-        DeviceContext _deviceContext;
+        readonly DeviceContext _deviceContext;
 
         public DXSprite(Device device, DeviceContext deviceContext)
         {

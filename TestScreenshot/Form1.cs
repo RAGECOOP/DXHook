@@ -152,7 +152,7 @@ namespace TestScreenshot
         /// <param name="message"></param>
         void CaptureInterface_RemoteMessage(MessageReceivedEventArgs message)
         {
-            txtDebugLog.Invoke(new MethodInvoker(delegate()
+            txtDebugLog.Invoke(new MethodInvoker(delegate
                 {
                     txtDebugLog.Text = String.Format("{0}\r\n{1}", message, txtDebugLog.Text);
                 })
@@ -166,7 +166,7 @@ namespace TestScreenshot
         /// <param name="message"></param>
         void ScreenshotManager_OnScreenshotDebugMessage(int clientPID, string message)
         {
-            txtDebugLog.Invoke(new MethodInvoker(delegate()
+            txtDebugLog.Invoke(new MethodInvoker(delegate
                 {
                     txtDebugLog.Text = String.Format("{0}:{1}\r\n{2}", clientPID, message, txtDebugLog.Text);
                 })
@@ -205,7 +205,7 @@ namespace TestScreenshot
         /// </summary>
         void DoRequest()
         {
-            progressBar1.Invoke(new MethodInvoker(delegate()
+            progressBar1.Invoke(new MethodInvoker(delegate
                 {
                     if (progressBar1.Value < progressBar1.Maximum)
                     {
@@ -215,7 +215,7 @@ namespace TestScreenshot
                         // Initiate the screenshot of the CaptureInterface, the appropriate event handler within the target process will take care of the rest
                         Size? resize = null;
                         if (!String.IsNullOrEmpty(txtResizeHeight.Text) && !String.IsNullOrEmpty(txtResizeWidth.Text))
-                            resize = new System.Drawing.Size(int.Parse(txtResizeWidth.Text), int.Parse(txtResizeHeight.Text));
+                            resize = new Size(int.Parse(txtResizeWidth.Text), int.Parse(txtResizeHeight.Text));
                         _captureProcess.CaptureInterface.BeginGetScreenshot(new Rectangle(int.Parse(txtCaptureX.Text), int.Parse(txtCaptureY.Text), int.Parse(txtCaptureWidth.Text), int.Parse(txtCaptureHeight.Text)), new TimeSpan(0, 0, 2), Callback, resize, (ImageFormat)Enum.Parse(typeof(ImageFormat), cmbFormat.Text));
                     }
                     else
@@ -241,8 +241,8 @@ namespace TestScreenshot
                 _captureProcess.CaptureInterface.DisplayInGameText("Screenshot captured...");
                 if (screenshot != null && screenshot.Data != null)
                 {
-                    pictureBox1.Invoke(new MethodInvoker(delegate()
-                    {
+                    pictureBox1.Invoke(new MethodInvoker(delegate
+                        {
                         if (pictureBox1.Image != null)
                         {
                             pictureBox1.Image.Dispose();
@@ -275,7 +275,7 @@ namespace TestScreenshot
             {
                 Elements = new List<IOverlayElement>
                 {
-                    new DXHook.Hook.Common.FramesPerSecond(new System.Drawing.Font("Arial", 16, FontStyle.Bold)) {
+                    new DXHook.Hook.Common.FramesPerSecond(new Font("Arial", 16, FontStyle.Bold)) {
                             Location = new Point(25, 25),
                             Color = Color.Red,
                             AntiAliased = true,

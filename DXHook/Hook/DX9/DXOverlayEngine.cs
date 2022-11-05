@@ -110,7 +110,7 @@ namespace DXHook.Hook.DX9
                     {
                         Font font = GetFontForTextElement(textElement);
                         if (font != null && !String.IsNullOrEmpty(textElement.Text))
-                            font.DrawText(_sprite, textElement.Text, textElement.Location.X, textElement.Location.Y, new SharpDX.ColorBGRA(textElement.Color.R, textElement.Color.G, textElement.Color.B, textElement.Color.A));
+                            font.DrawText(_sprite, textElement.Text, textElement.Location.X, textElement.Location.Y, new ColorBGRA(textElement.Color.R, textElement.Color.G, textElement.Color.B, textElement.Color.A));
                     }
                     else if (imageElement != null)
                     {
@@ -121,7 +121,7 @@ namespace DXHook.Hook.DX9
 
                         Texture image = GetImageForImageElement(imageElement);
                         if (image != null)
-                            _sprite.Draw(image, new SharpDX.ColorBGRA(imageElement.Tint.R, imageElement.Tint.G, imageElement.Tint.B, imageElement.Tint.A), null, null, new Vector3(imageElement.Location.X, imageElement.Location.Y, 0));
+                            _sprite.Draw(image, new ColorBGRA(imageElement.Tint.R, imageElement.Tint.G, imageElement.Tint.B, imageElement.Tint.A), null, null, new Vector3(imageElement.Location.X, imageElement.Location.Y, 0));
 
                         //Reset the transform for other elements
                         _sprite.Transform = Matrix.Identity;
@@ -181,7 +181,7 @@ namespace DXHook.Hook.DX9
             {
                 if (!_imageCache.TryGetValue(element, out result))
                 {
-                    result = ToDispose(SharpDX.Direct3D9.Texture.FromFile(Device, element.Filename));
+                    result = ToDispose(Texture.FromFile(Device, element.Filename));
 
                     _imageCache[element] = result;
                 }

@@ -54,7 +54,7 @@ namespace DXHook
             //_serverInterface = new CaptureInterface() { ProcessId = process.Id };
 
             // Initialise the IPC server (with our instance of _serverInterface)
-            _screenshotServer = RemoteHooking.IpcCreateServer<CaptureInterface>(
+            _screenshotServer = RemoteHooking.IpcCreateServer(
                 ref _channelName,
                 WellKnownObjectMode.Singleton,
                 CaptureInterface);

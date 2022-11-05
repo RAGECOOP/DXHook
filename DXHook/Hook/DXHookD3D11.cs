@@ -90,7 +90,7 @@ namespace DXHook.Hook
         SwapChain _swapChain;
         SharpDX.Windows.RenderForm _renderForm;
         Texture2D _resolvedRTShared;
-        SharpDX.DXGI.KeyedMutex _resolvedRTSharedKeyedMutex;
+        KeyedMutex _resolvedRTSharedKeyedMutex;
         ShaderResourceView _resolvedSRV;
         DX11.ScreenAlignedQuadRenderer _saQuad;
         Texture2D _finalRT;
@@ -105,8 +105,8 @@ namespace DXHook.Hook
 
         #region Main device resources
         Texture2D _resolvedRT;
-        SharpDX.DXGI.KeyedMutex _resolvedRTKeyedMutex;
-        SharpDX.DXGI.KeyedMutex _resolvedRTKeyedMutex_Dev2;
+        KeyedMutex _resolvedRTKeyedMutex;
+        KeyedMutex _resolvedRTKeyedMutex_Dev2;
         #endregion
 
         protected override string HookName
@@ -198,7 +198,7 @@ namespace DXHook.Hook
         /// <param name="device"></param>
         /// <returns></returns>
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate int DXGISwapChain_PresentDelegate(IntPtr swapChainPtr, int syncInterval, /* int */ SharpDX.DXGI.PresentFlags flags);
+        delegate int DXGISwapChain_PresentDelegate(IntPtr swapChainPtr, int syncInterval, /* int */ PresentFlags flags);
 
         /// <summary>
         /// The IDXGISwapChain.ResizeTarget function definition
@@ -279,7 +279,7 @@ namespace DXHook.Hook
                         Usage = ResourceUsage.Default,
                         Width = description.Width,
                         ArraySize = 1,
-                        SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0), // Ensure single sample
+                        SampleDescription = new SampleDescription(1, 0), // Ensure single sample
                         BindFlags = BindFlags.ShaderResource,
                         MipLevels = 1,
                         OptionFlags = resolvedRTOptionFlags
@@ -293,7 +293,7 @@ namespace DXHook.Hook
                 }
 
                 // Retrieve reference to the keyed mutex
-                _resolvedRTKeyedMutex = ToDispose(_resolvedRT.QueryInterfaceOrNull<SharpDX.DXGI.KeyedMutex>());
+                _resolvedRTKeyedMutex = ToDispose(_resolvedRT.QueryInterfaceOrNull<KeyedMutex>());
 
                 // If the resolvedRT is a shared resource _resolvedRTKeyedMutex will not be null
                 if (_resolvedRTKeyedMutex != null)
@@ -301,7 +301,7 @@ namespace DXHook.Hook
                     using (var resource = _resolvedRT.QueryInterface<SharpDX.DXGI.Resource>())
                     {
                         _resolvedRTShared = ToDispose(resizeDevice.OpenSharedResource<Texture2D>(resource.SharedHandle));
-                        _resolvedRTKeyedMutex_Dev2 = ToDispose(_resolvedRTShared.QueryInterfaceOrNull<SharpDX.DXGI.KeyedMutex>());
+                        _resolvedRTKeyedMutex_Dev2 = ToDispose(_resolvedRTShared.QueryInterfaceOrNull<KeyedMutex>());
                     }
                     // SRV for use if resizing
                     _resolvedSRV = ToDispose(new ShaderResourceView(resizeDevice, _resolvedRTShared));
@@ -319,7 +319,7 @@ namespace DXHook.Hook
                     Usage = ResourceUsage.Staging,
                     Width = captureRegion.Width,
                     ArraySize = 1,
-                    SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
+                    SampleDescription = new SampleDescription(1, 0),
                     BindFlags = BindFlags.None,
                     MipLevels = 1,
                     OptionFlags = ResourceOptionFlags.None
@@ -339,11 +339,11 @@ namespace DXHook.Hook
 
                 _resizedRT = ToDispose(new Texture2D(resizeDevice, new Texture2DDescription
                 {
-                    Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm, // Supports BMP/PNG/etc
+                    Format = Format.R8G8B8A8_UNorm, // Supports BMP/PNG/etc
                     Height = request.Resize.Value.Height,
                     Width = request.Resize.Value.Width,
                     ArraySize = 1,
-                    SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
+                    SampleDescription = new SampleDescription(1, 0),
                     BindFlags = BindFlags.RenderTarget,
                     MipLevels = 1,
                     Usage = ResourceUsage.Default,
@@ -364,12 +364,12 @@ namespace DXHook.Hook
         /// <param name="syncInterval"></param>
         /// <param name="flags"></param>
         /// <returns>The HRESULT of the original method</returns>
-        int PresentHook(IntPtr swapChainPtr, int syncInterval, SharpDX.DXGI.PresentFlags flags)
+        int PresentHook(IntPtr swapChainPtr, int syncInterval, PresentFlags flags)
         {
             try
             {
                 Frame();
-                SwapChain swapChain = (SharpDX.DXGI.SwapChain)swapChainPtr;
+                SwapChain swapChain = (SwapChain)swapChainPtr;
 
                 #region Screenshot Request
                 if (Request != null)
@@ -476,7 +476,7 @@ namespace DXHook.Hook
                                     Right = captureRegion.Right,
                                     Front = 0,
                                     Back = 1 // Must be 1 or only black will be copied
-                                }, _finalRT, 0, 0, 0, 0);
+                                }, _finalRT, 0);
 
                                 // Release lock upon shared surface on second device
                                 if (acquireLock && _resolvedRTKeyedMutex_Dev2 != null)
@@ -536,7 +536,7 @@ namespace DXHook.Hook
                                         }
                                     }
                                 }
-                                catch (SharpDX.SharpDXException exc)
+                                catch (SharpDXException exc)
                                 {
                                     // Catch DXGI_ERROR_WAS_STILL_DRAWING and ignore - the data isn't available yet
                                 }
@@ -605,7 +605,7 @@ namespace DXHook.Hook
         /// <param name="texture"></param>
         /// <param name="outputFormat"></param>
         /// <param name="stream"></param>
-        public void ToStream(SharpDX.Direct3D11.DeviceContext context, Texture2D texture, ImageFormat outputFormat, Stream stream)
+        public void ToStream(DeviceContext context, Texture2D texture, ImageFormat outputFormat, Stream stream)
         {
             if (wicFactory == null)
                 wicFactory = ToDispose(new SharpDX.WIC.ImagingFactory2());
@@ -704,114 +704,114 @@ namespace DXHook.Hook
         }
 
 
-        public static Guid PixelFormatFromFormat(SharpDX.DXGI.Format format)
+        public static Guid PixelFormatFromFormat(Format format)
         {
             switch (format)
             {
-                case SharpDX.DXGI.Format.R32G32B32A32_Typeless:
-                case SharpDX.DXGI.Format.R32G32B32A32_Float:
+                case Format.R32G32B32A32_Typeless:
+                case Format.R32G32B32A32_Float:
                     return SharpDX.WIC.PixelFormat.Format128bppRGBAFloat;
-                case SharpDX.DXGI.Format.R32G32B32A32_UInt:
-                case SharpDX.DXGI.Format.R32G32B32A32_SInt:
+                case Format.R32G32B32A32_UInt:
+                case Format.R32G32B32A32_SInt:
                     return SharpDX.WIC.PixelFormat.Format128bppRGBAFixedPoint;
-                case SharpDX.DXGI.Format.R32G32B32_Typeless:
-                case SharpDX.DXGI.Format.R32G32B32_Float:
+                case Format.R32G32B32_Typeless:
+                case Format.R32G32B32_Float:
                     return SharpDX.WIC.PixelFormat.Format96bppRGBFloat;
-                case SharpDX.DXGI.Format.R32G32B32_UInt:
-                case SharpDX.DXGI.Format.R32G32B32_SInt:
+                case Format.R32G32B32_UInt:
+                case Format.R32G32B32_SInt:
                     return SharpDX.WIC.PixelFormat.Format96bppRGBFixedPoint;
-                case SharpDX.DXGI.Format.R16G16B16A16_Typeless:
-                case SharpDX.DXGI.Format.R16G16B16A16_Float:
-                case SharpDX.DXGI.Format.R16G16B16A16_UNorm:
-                case SharpDX.DXGI.Format.R16G16B16A16_UInt:
-                case SharpDX.DXGI.Format.R16G16B16A16_SNorm:
-                case SharpDX.DXGI.Format.R16G16B16A16_SInt:
+                case Format.R16G16B16A16_Typeless:
+                case Format.R16G16B16A16_Float:
+                case Format.R16G16B16A16_UNorm:
+                case Format.R16G16B16A16_UInt:
+                case Format.R16G16B16A16_SNorm:
+                case Format.R16G16B16A16_SInt:
                     return SharpDX.WIC.PixelFormat.Format64bppRGBA;
-                case SharpDX.DXGI.Format.R32G32_Typeless:
-                case SharpDX.DXGI.Format.R32G32_Float:
-                case SharpDX.DXGI.Format.R32G32_UInt:
-                case SharpDX.DXGI.Format.R32G32_SInt:
-                case SharpDX.DXGI.Format.R32G8X24_Typeless:
-                case SharpDX.DXGI.Format.D32_Float_S8X24_UInt:
-                case SharpDX.DXGI.Format.R32_Float_X8X24_Typeless:
-                case SharpDX.DXGI.Format.X32_Typeless_G8X24_UInt:
+                case Format.R32G32_Typeless:
+                case Format.R32G32_Float:
+                case Format.R32G32_UInt:
+                case Format.R32G32_SInt:
+                case Format.R32G8X24_Typeless:
+                case Format.D32_Float_S8X24_UInt:
+                case Format.R32_Float_X8X24_Typeless:
+                case Format.X32_Typeless_G8X24_UInt:
                     return Guid.Empty;
-                case SharpDX.DXGI.Format.R10G10B10A2_Typeless:
-                case SharpDX.DXGI.Format.R10G10B10A2_UNorm:
-                case SharpDX.DXGI.Format.R10G10B10A2_UInt:
+                case Format.R10G10B10A2_Typeless:
+                case Format.R10G10B10A2_UNorm:
+                case Format.R10G10B10A2_UInt:
                     return SharpDX.WIC.PixelFormat.Format32bppRGBA1010102;
-                case SharpDX.DXGI.Format.R11G11B10_Float:
+                case Format.R11G11B10_Float:
                     return Guid.Empty;
-                case SharpDX.DXGI.Format.R8G8B8A8_Typeless:
-                case SharpDX.DXGI.Format.R8G8B8A8_UNorm:
-                case SharpDX.DXGI.Format.R8G8B8A8_UNorm_SRgb:
-                case SharpDX.DXGI.Format.R8G8B8A8_UInt:
-                case SharpDX.DXGI.Format.R8G8B8A8_SNorm:
-                case SharpDX.DXGI.Format.R8G8B8A8_SInt:
+                case Format.R8G8B8A8_Typeless:
+                case Format.R8G8B8A8_UNorm:
+                case Format.R8G8B8A8_UNorm_SRgb:
+                case Format.R8G8B8A8_UInt:
+                case Format.R8G8B8A8_SNorm:
+                case Format.R8G8B8A8_SInt:
                     return SharpDX.WIC.PixelFormat.Format32bppRGBA;
-                case SharpDX.DXGI.Format.R16G16_Typeless:
-                case SharpDX.DXGI.Format.R16G16_Float:
-                case SharpDX.DXGI.Format.R16G16_UNorm:
-                case SharpDX.DXGI.Format.R16G16_UInt:
-                case SharpDX.DXGI.Format.R16G16_SNorm:
-                case SharpDX.DXGI.Format.R16G16_SInt:
+                case Format.R16G16_Typeless:
+                case Format.R16G16_Float:
+                case Format.R16G16_UNorm:
+                case Format.R16G16_UInt:
+                case Format.R16G16_SNorm:
+                case Format.R16G16_SInt:
                     return Guid.Empty;
-                case SharpDX.DXGI.Format.R32_Typeless:
-                case SharpDX.DXGI.Format.D32_Float:
-                case SharpDX.DXGI.Format.R32_Float:
-                case SharpDX.DXGI.Format.R32_UInt:
-                case SharpDX.DXGI.Format.R32_SInt:
+                case Format.R32_Typeless:
+                case Format.D32_Float:
+                case Format.R32_Float:
+                case Format.R32_UInt:
+                case Format.R32_SInt:
                     return Guid.Empty;
-                case SharpDX.DXGI.Format.R24G8_Typeless:
-                case SharpDX.DXGI.Format.D24_UNorm_S8_UInt:
-                case SharpDX.DXGI.Format.R24_UNorm_X8_Typeless:
+                case Format.R24G8_Typeless:
+                case Format.D24_UNorm_S8_UInt:
+                case Format.R24_UNorm_X8_Typeless:
                     return SharpDX.WIC.PixelFormat.Format32bppGrayFloat;
-                case SharpDX.DXGI.Format.X24_Typeless_G8_UInt:
-                case SharpDX.DXGI.Format.R9G9B9E5_Sharedexp:
-                case SharpDX.DXGI.Format.R8G8_B8G8_UNorm:
-                case SharpDX.DXGI.Format.G8R8_G8B8_UNorm:
+                case Format.X24_Typeless_G8_UInt:
+                case Format.R9G9B9E5_Sharedexp:
+                case Format.R8G8_B8G8_UNorm:
+                case Format.G8R8_G8B8_UNorm:
                     return Guid.Empty;
-                case SharpDX.DXGI.Format.B8G8R8A8_UNorm:
-                case SharpDX.DXGI.Format.B8G8R8X8_UNorm:
+                case Format.B8G8R8A8_UNorm:
+                case Format.B8G8R8X8_UNorm:
                     return SharpDX.WIC.PixelFormat.Format32bppBGRA;
-                case SharpDX.DXGI.Format.R10G10B10_Xr_Bias_A2_UNorm:
+                case Format.R10G10B10_Xr_Bias_A2_UNorm:
                     return SharpDX.WIC.PixelFormat.Format32bppBGR101010;
-                case SharpDX.DXGI.Format.B8G8R8A8_Typeless:
-                case SharpDX.DXGI.Format.B8G8R8A8_UNorm_SRgb:
-                case SharpDX.DXGI.Format.B8G8R8X8_Typeless:
-                case SharpDX.DXGI.Format.B8G8R8X8_UNorm_SRgb:
+                case Format.B8G8R8A8_Typeless:
+                case Format.B8G8R8A8_UNorm_SRgb:
+                case Format.B8G8R8X8_Typeless:
+                case Format.B8G8R8X8_UNorm_SRgb:
                     return SharpDX.WIC.PixelFormat.Format32bppBGRA;
-                case SharpDX.DXGI.Format.R8G8_Typeless:
-                case SharpDX.DXGI.Format.R8G8_UNorm:
-                case SharpDX.DXGI.Format.R8G8_UInt:
-                case SharpDX.DXGI.Format.R8G8_SNorm:
-                case SharpDX.DXGI.Format.R8G8_SInt:
+                case Format.R8G8_Typeless:
+                case Format.R8G8_UNorm:
+                case Format.R8G8_UInt:
+                case Format.R8G8_SNorm:
+                case Format.R8G8_SInt:
                     return Guid.Empty;
-                case SharpDX.DXGI.Format.R16_Typeless:
-                case SharpDX.DXGI.Format.R16_Float:
-                case SharpDX.DXGI.Format.D16_UNorm:
-                case SharpDX.DXGI.Format.R16_UNorm:
-                case SharpDX.DXGI.Format.R16_SNorm:
+                case Format.R16_Typeless:
+                case Format.R16_Float:
+                case Format.D16_UNorm:
+                case Format.R16_UNorm:
+                case Format.R16_SNorm:
                     return SharpDX.WIC.PixelFormat.Format16bppGrayHalf;
-                case SharpDX.DXGI.Format.R16_UInt:
-                case SharpDX.DXGI.Format.R16_SInt:
+                case Format.R16_UInt:
+                case Format.R16_SInt:
                     return SharpDX.WIC.PixelFormat.Format16bppGrayFixedPoint;
-                case SharpDX.DXGI.Format.B5G6R5_UNorm:
+                case Format.B5G6R5_UNorm:
                     return SharpDX.WIC.PixelFormat.Format16bppBGR565;
-                case SharpDX.DXGI.Format.B5G5R5A1_UNorm:
+                case Format.B5G5R5A1_UNorm:
                     return SharpDX.WIC.PixelFormat.Format16bppBGRA5551;
-                case SharpDX.DXGI.Format.B4G4R4A4_UNorm:
+                case Format.B4G4R4A4_UNorm:
                     return Guid.Empty;
 
-                case SharpDX.DXGI.Format.R8_Typeless:
-                case SharpDX.DXGI.Format.R8_UNorm:
-                case SharpDX.DXGI.Format.R8_UInt:
-                case SharpDX.DXGI.Format.R8_SNorm:
-                case SharpDX.DXGI.Format.R8_SInt:
+                case Format.R8_Typeless:
+                case Format.R8_UNorm:
+                case Format.R8_UInt:
+                case Format.R8_SNorm:
+                case Format.R8_SInt:
                     return SharpDX.WIC.PixelFormat.Format8bppGray;
-                case SharpDX.DXGI.Format.A8_UNorm:
+                case Format.A8_UNorm:
                     return SharpDX.WIC.PixelFormat.Format8bppAlpha;
-                case SharpDX.DXGI.Format.R1_UNorm:
+                case Format.R1_UNorm:
                     return SharpDX.WIC.PixelFormat.Format1bppIndexed;
 
                 default:

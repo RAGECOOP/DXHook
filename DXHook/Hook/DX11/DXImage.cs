@@ -49,7 +49,7 @@ namespace DXHook.Hook.DX11
         }
 
         private Texture2DDescription _textDesc;
-        private ShaderResourceViewDescription _srvDesc;
+        private readonly ShaderResourceViewDescription _srvDesc;
 
         private readonly object _srvLock = new object();
 

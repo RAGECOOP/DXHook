@@ -170,7 +170,7 @@ namespace DXHook.Hook
 
                         using (var renderForm = new System.Windows.Forms.Form())
                         {
-                            using (SharpDX.DXGI.SwapChain sc = new SharpDX.DXGI.SwapChain(factory, device, DXGI.CreateSwapChainDescription(renderForm.Handle)))
+                            using (SwapChain sc = new SwapChain(factory, device, DXGI.CreateSwapChainDescription(renderForm.Handle)))
                             {
                                 _dxgiSwapChainVTblAddresses.AddRange(GetVTblAddresses(sc.NativePointer, DXGI.DXGI_SWAPCHAIN_METHOD_COUNT));
                             }
@@ -245,7 +245,7 @@ namespace DXHook.Hook
             // IF the size of the texture is known each time, we could create it once, and then possibly need to resize it here
 
             swapChain.ResizeTarget(ref newTargetParameters);
-            return SharpDX.Result.Ok.Code;
+            return Result.Ok.Code;
         }
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace DXHook.Hook
         int PresentHook(IntPtr swapChainPtr, int syncInterval, PresentFlags flags)
         {
             Frame();
-            SwapChain swapChain = (SharpDX.DXGI.SwapChain)swapChainPtr;
+            SwapChain swapChain = (SwapChain)swapChainPtr;
 
 
             try
@@ -270,7 +270,7 @@ namespace DXHook.Hook
                     {
                         DebugMessage("PresentHook: Request Start");
                         DateTime startTime = DateTime.Now;
-                        using (Texture2D texture = Texture2D.FromSwapChain<SharpDX.Direct3D10.Texture2D>(swapChain, 0))
+                        using (Texture2D texture = Texture2D.FromSwapChain<Texture2D>(swapChain, 0))
                         {
                             #region Determine region to capture
                             System.Drawing.Rectangle regionToCapture = new System.Drawing.Rectangle(0, 0, texture.Description.Width, texture.Description.Height);
@@ -297,7 +297,7 @@ namespace DXHook.Hook
                                     Usage = ResourceUsage.Default,
                                     Width = texture.Description.Width,
                                     ArraySize = 1,
-                                    SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0), // Ensure single sample
+                                    SampleDescription = new SampleDescription(1, 0), // Ensure single sample
                                     BindFlags = BindFlags.None,
                                     MipLevels = 1,
                                     OptionFlags = texture.Description.OptionFlags
@@ -313,12 +313,12 @@ namespace DXHook.Hook
                             Texture2D textureDest = new Texture2D(texture.Device, new Texture2DDescription
                             {
                                     CpuAccessFlags = CpuAccessFlags.None,// CpuAccessFlags.Write | CpuAccessFlags.Read,
-                                    Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm, // Supports BMP/PNG
+                                    Format = Format.R8G8B8A8_UNorm, // Supports BMP/PNG
                                     Height = regionToCapture.Height,
                                     Usage = ResourceUsage.Default,// ResourceUsage.Staging,
                                     Width = regionToCapture.Width,
                                     ArraySize = 1,//texture.Description.ArraySize,
-                                    SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),// texture.Description.SampleDescription,
+                                    SampleDescription = new SampleDescription(1, 0),// texture.Description.SampleDescription,
                                     BindFlags = BindFlags.None,
                                     MipLevels = 1,//texture.Description.MipLevels,
                                     OptionFlags = texture.Description.OptionFlags
@@ -385,20 +385,20 @@ namespace DXHook.Hook
                 #region Example: Draw overlay (after screenshot so we don't capture overlay as well)
                 if (Config.ShowOverlay)
                 {
-                    using (Texture2D texture = Texture2D.FromSwapChain<SharpDX.Direct3D10.Texture2D>(swapChain, 0))
+                    using (Texture2D texture = Texture2D.FromSwapChain<Texture2D>(swapChain, 0))
                     {
                         if (FPS.GetFPS() >= 1)
                         {
-                            FontDescription fd = new SharpDX.Direct3D10.FontDescription
+                            FontDescription fd = new FontDescription
                             {
                                 Height = 16,
                                 FaceName = "Arial",
                                 Italic = false,
                                 Width = 0,
                                 MipLevels = 1,
-                                CharacterSet = SharpDX.Direct3D10.FontCharacterSet.Default,
-                                OutputPrecision = SharpDX.Direct3D10.FontPrecision.Default,
-                                Quality = SharpDX.Direct3D10.FontQuality.Antialiased,
+                                CharacterSet = FontCharacterSet.Default,
+                                OutputPrecision = FontPrecision.Default,
+                                Quality = FontQuality.Antialiased,
                                 PitchAndFamily = FontPitchAndFamily.Default | FontPitchAndFamily.DontCare,
                                 Weight = FontWeight.Bold
                             };
@@ -406,7 +406,7 @@ namespace DXHook.Hook
                             // TODO: Font should not be created every frame!
                             using (Font font = new Font(texture.Device, fd))
                             {
-                                DrawText(font, new Vector2(5, 5), String.Format("{0:N0} fps", FPS.GetFPS()), new Color4(SharpDX.Color.Red.ToColor3()));
+                                DrawText(font, new Vector2(5, 5), String.Format("{0:N0} fps", FPS.GetFPS()), new Color4(Color.Red.ToColor3()));
 
                                 if (TextDisplay != null && TextDisplay.Display)
                                 {
@@ -428,12 +428,12 @@ namespace DXHook.Hook
             // As always we need to call the original method, note that EasyHook has already repatched the original method
             // so calling it here will not cause an endless recursion to this function
             swapChain.Present(syncInterval, flags);
-            return SharpDX.Result.Ok.Code;
+            return Result.Ok.Code;
         }
 
         private void DrawText(Font font, Vector2 pos, string text, Color4 color)
         {
-            font.DrawText(null, text, new SharpDX.Rectangle((int)pos.X, (int)pos.Y, 0, 0), SharpDX.Direct3D10.FontDrawFlags.NoClip, color);
+            font.DrawText(null, text, new Rectangle((int)pos.X, (int)pos.Y, 0, 0), FontDrawFlags.NoClip, color);
         }
     }
 }

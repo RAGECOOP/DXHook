@@ -39,18 +39,18 @@ namespace DXHook.Hook.DX11
     public class DeviceManager : SharpDX.Component
     {
         // Direct3D Objects
-        protected SharpDX.Direct3D11.Device d3dDevice;
-        protected SharpDX.Direct3D11.DeviceContext d3dContext;
+        protected Device d3dDevice;
+        protected DeviceContext d3dContext;
 
         /// <summary>
         /// Gets the Direct3D11 device.
         /// </summary>
-        public SharpDX.Direct3D11.Device Direct3DDevice { get { return d3dDevice; } }
+        public Device Direct3DDevice { get { return d3dDevice; } }
 
         /// <summary>
         /// Gets the Direct3D11 immediate context.
         /// </summary>
-        public SharpDX.Direct3D11.DeviceContext Direct3DContext { get { return d3dContext; } }
+        public DeviceContext Direct3DContext { get { return d3dContext; } }
 
         public DeviceManager(Device device)
         {

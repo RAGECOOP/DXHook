@@ -123,7 +123,7 @@ namespace DXHook.Hook.DX11
             texDesc.OptionFlags = ResourceOptionFlags.None;
 
 
-            SharpDX.DataBox data;
+            DataBox data;
             data.DataPointer = bmData.Scan0;
             data.RowPitch = _texWidth * 4;
             data.SlicePitch = 0;
