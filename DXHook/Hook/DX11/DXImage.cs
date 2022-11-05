@@ -1,21 +1,23 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Xml.Linq;
+using BitmapUtil;
 using SharpDX;
 using SharpDX.Direct3D11;
+#pragma warning disable CS1591
 
 namespace DXHook.Hook.DX11
 {
     public class DXImage : DisposeCollector
     {
-        DeviceContext _deviceContext;
-        Texture2D _tex;
-        ShaderResourceView _texSRV;
-        bool _initialised;
+        private DeviceContext _deviceContext;
+        private Texture2D _tex;
+        private ShaderResourceView _texSRV;
+        private bool _initialised;
 
-        public int Width { get; private set; }
-
-        public int Height { get; private set; }
+        public int Width => _textDesc.Width;
+        public int Height=>_textDesc.Height;
 
         public Device Device { get; }
 
@@ -25,8 +27,6 @@ namespace DXHook.Hook.DX11
             _deviceContext = deviceContext;
             _tex = null;
             _texSRV = null;
-            Width = 0;
-            Height = 0;
 
 
             _srvDesc = new ShaderResourceViewDescription();
@@ -53,54 +53,35 @@ namespace DXHook.Hook.DX11
 
         private readonly object _srvLock = new object();
 
-        public bool Initialise(Bitmap bitmap)
+        public bool Initialise(BitmapInfo bdata)
         {
-            lock (this)
+            return Initialise(bdata.Width, bdata.Height, bdata.Stride, bdata.Scan0);
+        }
+        public bool Initialise(int width,int height,int stride,IntPtr scan0)
+        {
+            lock(this)
             {
-                _tex?.Dispose();
-                _texSRV?.Dispose();
                 RemoveAndDispose(ref _tex);
                 RemoveAndDispose(ref _texSRV);
                 _tex = null;
                 _texSRV = null;
-                GC.Collect();
 
-                //Debug.Assert(bitmap.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                System.Drawing.Imaging.BitmapData bmData;
+                _textDesc.Width = width;
+                _textDesc.Height = height; DataBox data;
+                data.DataPointer = scan0;
+                data.RowPitch = stride;// _texWidth * 4;
+                data.SlicePitch = 0;
 
-                _textDesc.Width = Width = bitmap.Width;
-                _textDesc.Height = Height = bitmap.Height;
+                _tex = Collect(new Texture2D(Device, _textDesc, new[] { data }));
+                if (_tex == null)
+                    return false;
 
-                bmData = bitmap.LockBits(new Rectangle(0, 0, Width, Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                try
-                {
-
-                    SharpDX.DataBox data;
-                    data.DataPointer = bmData.Scan0;
-                    data.RowPitch = bmData.Stride;// _texWidth * 4;
-                    data.SlicePitch = 0;
-
-                    _tex = Collect(new Texture2D(Device, _textDesc, new[] { data }));
-                    if (_tex == null)
-                        return false;
-
-                    _texSRV = Collect(new ShaderResourceView(Device, _tex, _srvDesc));
-                    if (_texSRV == null)
-                        return false;
-                }
-                finally
-                {
-                    bitmap.UnlockBits(bmData);
-                }
-
+                _texSRV = Collect(new ShaderResourceView(Device, _tex, _srvDesc));
+                if (_texSRV == null)
+                    return false;
                 _initialised = true;
                 return true;
             }
-        }
-
-        public void Update(Bitmap bitmap)
-        {
-            Initialise(bitmap);
         }
 
         public ShaderResourceView GetSRV()

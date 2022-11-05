@@ -24,13 +24,12 @@ namespace Example
         DXHookD3D11 Hook;
 
 
-        static readonly Bitmap blah = Image.FromFile(@"M:\SandBox-Shared\Pictures\ragecoop-bg.png") as Bitmap;
-        static readonly Bitmap bra = Image.FromFile(@"M:\SandBox-Shared\Pictures\braw.png") as Bitmap;
+        static readonly Bitmap blah = Image.FromFile(@"M:\SandBox-Shared\Pictures\braw.png") as Bitmap;
         ImageElement _img;
         bool second;
         public Example()
         {
-            var hwnd = Process.GetProcessesByName("explorer").Where(x => x.MainWindowHandle != IntPtr.Zero).First().MainWindowHandle;
+            var hwnd = Process.GetProcessesByName("explorer").First(x => x.MainWindowHandle != IntPtr.Zero).MainWindowHandle;
             KeyDown += OnKeyDown;
             Aborted += OnAborted;
 
@@ -49,9 +48,9 @@ namespace Example
             Hook?.Cleanup();
         }
 
-        private void OnKeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        private void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.O)
+            if (e.KeyCode == Keys.L)
             {
 
                 if (Hook != null)
@@ -71,35 +70,19 @@ namespace Example
                         ShowOverlay = true
                     };
                     Hook.Hook();
+                    GTA.UI.Notification.Show(blah.PixelFormat.ToString());
+                    Script.Wait(5000);
                     _img = new ImageElement(blah) { Scale = 0.3f };
                     Interface.DrawOverlayInGame(new Overlay
                     {
-                        Elements = new List<IOverlayElement> {
-                        _img
-                    },
+                        Elements = new List<IOverlayElement>
+                        {
+                            _img
+                        },
                         Hidden = false,
                     });
                 }
             }
-            else if (e.KeyCode == Keys.U)
-            {
-            }
-        }
-        Stopwatch sw = Stopwatch.StartNew();
-        public void Switch()
-        {
-            if (sw.ElapsedMilliseconds <= 30) { return; }
-            if (Hook == null) { return; }
-            if (second)
-            {
-                _img.SetBitmap(blah);
-            }
-            else
-            {
-                _img.SetBitmap(bra);
-            }
-            second = !second;
-            sw.Restart();
         }
     }
 }

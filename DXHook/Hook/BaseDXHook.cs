@@ -11,11 +11,14 @@ using System.Drawing.Imaging;
 using System.Diagnostics;
 using DXHook.Interface;
 using System.Threading;
+using SharpDX.DXGI;
 
 namespace DXHook.Hook
 {
     public abstract class BaseDXHook: SharpDX.Component, IDXHook
     {
+        public delegate void PresentDelegate();
+        public event PresentDelegate OnPresent; 
         protected readonly ClientCaptureInterfaceEventProxy InterfaceEventProxy = new ClientCaptureInterfaceEventProxy();
 
         public BaseDXHook(CaptureInterface ssInterface)
@@ -70,9 +73,9 @@ namespace DXHook.Hook
 
         protected TextDisplay TextDisplay { get; set; }
 
-        protected List<Common.IOverlay> Overlays { get; set; }
+        public List<Common.IOverlay> Overlays { get; set; }
  
-        protected bool IsOverlayUpdatePending { get; set; }
+        public bool IsOverlayUpdatePending { get; set; }
 
         int _processId;
         protected int ProcessId
@@ -97,6 +100,7 @@ namespace DXHook.Hook
 
         protected void Frame()
         {
+            OnPresent?.Invoke();
             FPS.Frame();
             if (TextDisplay != null && TextDisplay.Display) 
                 TextDisplay.Frame();

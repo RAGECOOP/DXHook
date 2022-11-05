@@ -186,11 +186,11 @@ namespace DXHook.Hook.DX9
                     _imageCache[element] = result;
                 }
             }
-            else if (!_imageCache.TryGetValue(element, out result) && element._initialBmp != null)
+            else if (!_imageCache.TryGetValue(element, out result) && element.Bitmap != null)
             {
                 using (var ms = new MemoryStream())
                 {
-                    element._initialBmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    element.Bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
                     ms.Seek(0, SeekOrigin.Begin);
                     result = ToDispose(Texture.FromStream(Device, ms));
                 }

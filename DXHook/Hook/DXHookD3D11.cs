@@ -86,7 +86,7 @@ namespace DXHook.Hook
         readonly object _lock = new object();
 
         #region Internal device resources
-        SharpDX.Direct3D11.Device _device;
+        public SharpDX.Direct3D11.Device Device;
         SwapChain _swapChain;
         SharpDX.Windows.RenderForm _renderForm;
         Texture2D _resolvedRTShared;
@@ -133,16 +133,16 @@ namespace DXHook.Hook
                     DriverType.Hardware,
                     DeviceCreationFlags.BgraSupport,
                     DXGI.CreateSwapChainDescription(_renderForm.Handle),
-                    out _device,
+                    out Device,
                     out _swapChain);
 
-                ToDispose(_device);
+                ToDispose(Device);
                 ToDispose(_swapChain);
 
-                if (_device != null && _swapChain != null)
+                if (Device != null && _swapChain != null)
                 {
                     DebugMessage("Hook: Device created");
-                    _d3d11VTblAddresses.AddRange(GetVTblAddresses(_device.NativePointer, D3D11_DEVICE_METHOD_COUNT));
+                    _d3d11VTblAddresses.AddRange(GetVTblAddresses(Device.NativePointer, D3D11_DEVICE_METHOD_COUNT));
                     _dxgiSwapChainVTblAddresses.AddRange(GetVTblAddresses(_swapChain.NativePointer, DXGI.DXGI_SWAPCHAIN_METHOD_COUNT));
                 }
                 else
@@ -218,10 +218,17 @@ namespace DXHook.Hook
         int ResizeTargetHook(IntPtr swapChainPtr, ref ModeDescription newTargetParameters)
         {
             // Dispose of overlay engine (so it will be recreated with correct renderTarget view size)
-            if (_overlayEngine != null)
+            try
             {
-                _overlayEngine.Dispose();
-                _overlayEngine = null;
+                if (_overlayEngine != null)
+                {
+                    _overlayEngine.Dispose();
+                    _overlayEngine = null;
+                }
+            }
+            catch (Exception e)
+            {
+                DebugMessage($"{nameof(ResizeTargetHook)}: Exception: " + e.GetType().FullName + ": " + e);
             }
 
             return DXGISwapChain_ResizeTargetHook.Original(swapChainPtr, ref newTargetParameters);
@@ -229,13 +236,13 @@ namespace DXHook.Hook
 
         void EnsureResources(SharpDX.Direct3D11.Device device, Texture2DDescription description, Rectangle captureRegion, ScreenshotRequest request, bool useSameDeviceForResize = false)
         {
-            var resizeDevice = useSameDeviceForResize ? device : _device;
+            var resizeDevice = useSameDeviceForResize ? device : Device;
 
             // Check if _resolvedRT or _finalRT require creation
-            if (_finalRT != null && (_finalRT.Device.NativePointer == device.NativePointer || _finalRT.Device.NativePointer == _device.NativePointer) &&
+            if (_finalRT != null && (_finalRT.Device.NativePointer == device.NativePointer || _finalRT.Device.NativePointer == Device.NativePointer) &&
                 _finalRT.Description.Height == captureRegion.Height && _finalRT.Description.Width == captureRegion.Width &&
                 _resolvedRT != null && _resolvedRT.Description.Height == description.Height && _resolvedRT.Description.Width == description.Width &&
-                (_resolvedRT.Device.NativePointer == device.NativePointer || _resolvedRT.Device.NativePointer == _device.NativePointer) && _resolvedRT.Description.Format == description.Format
+                (_resolvedRT.Device.NativePointer == device.NativePointer || _resolvedRT.Device.NativePointer == Device.NativePointer) && _resolvedRT.Description.Format == description.Format
                 )
             {
 
@@ -320,7 +327,7 @@ namespace DXHook.Hook
                 _finalRTMapped = false;
             }
 
-            if (_resolvedRT != null && _resolvedRTKeyedMutex_Dev2 == null && resizeDevice == _device)
+            if (_resolvedRT != null && _resolvedRTKeyedMutex_Dev2 == null && resizeDevice == Device)
                 resizeDevice = device;
 
             if (resizeDevice != null && request.Resize != null && (_resizedRT == null || (_resizedRT.Device.NativePointer != resizeDevice.NativePointer || _resizedRT.Description.Width != request.Resize.Value.Width || _resizedRT.Description.Height != request.Resize.Value.Height)))
@@ -359,10 +366,11 @@ namespace DXHook.Hook
         /// <returns>The HRESULT of the original method</returns>
         int PresentHook(IntPtr swapChainPtr, int syncInterval, SharpDX.DXGI.PresentFlags flags)
         {
-            Frame();
-            SwapChain swapChain = (SharpDX.DXGI.SwapChain)swapChainPtr;
             try
             {
+                Frame();
+                SwapChain swapChain = (SharpDX.DXGI.SwapChain)swapChainPtr;
+
                 #region Screenshot Request
                 if (Request != null)
                 {

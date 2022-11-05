@@ -195,14 +195,23 @@ namespace DXHook.Hook.DX11
 
         DXImage GetImageForImageElement(ImageElement element)
         {
-            
-            if (element.Image == null && element._initialBmp != null)
+            if (element == null) return null;
+            lock (element.SwapLock)
             {
-                element.Image = ToDispose(new DXImage(_device, _deviceContext));
-                element.Image.Initialise(element._initialBmp);
+                if (element.Front == null)
+                {
+                    element.Front = new DXImage(_device, _deviceContext);
+                    if (element.BitmapInfo.Scan0 != default)
+                    {
+                        element.Front.Initialise(element.BitmapInfo);
+                    }
+                }
+                if (element.Back == null)
+                {
+                    element.Back = new DXImage(_device, _deviceContext);
+                }
+                return element.Front;
             }
-
-            return element.Image;
         }
 
         /// <summary>
